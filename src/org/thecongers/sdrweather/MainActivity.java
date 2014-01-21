@@ -120,6 +120,7 @@ public class MainActivity extends Activity {
         	//	e.printStackTrace();
         	//}
 
+        	//Display Output
         	//String nativeOutput =  output.toString();
         	//TextView view =  (TextView) findViewById(R.id.TextView02);
         	//view.setText(nativeOutput);
