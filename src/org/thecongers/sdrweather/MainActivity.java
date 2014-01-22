@@ -92,12 +92,12 @@ public class MainActivity extends Activity {
         	//End
         	view =  (TextView) findViewById(R.id.TextView02);
         	BufferedReader reader = new BufferedReader(new InputStreamReader(nativeApp.getInputStream()));
-        	String line;
         	int read;
         	char[] buffer = new char[4096];
         	StringBuffer output = new StringBuffer();
         	
         	try {
+        		//String line;
         		//while ((line = reader.readLine()) != null) {
         	    //    System.out.println(line); 
         	    //    view.append(line);
