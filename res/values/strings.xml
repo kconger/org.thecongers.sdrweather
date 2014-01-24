@@ -7,5 +7,6 @@
     <string name="header">Command Output</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
+    <string name="refresh">Refresh</string>
 
 </resources>

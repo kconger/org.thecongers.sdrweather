@@ -36,14 +36,21 @@
 
             <Button
                 android:id="@+id/button2"
-                android:layout_width="150dp"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:onClick="onClickStart"
                 android:text="@string/start" />
 
             <Button
+                android:id="@+id/button3"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:onClick="onClickRefresh"
+                android:text="@string/refresh" />
+
+            <Button
                 android:id="@+id/button1"
-                android:layout_width="150dp"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:onClick="onClickStop"
                 android:text="@string/stop" />
