@@ -105,9 +105,9 @@ public class MainActivity extends Activity {
         @Override
         protected Void doInBackground(String... params) {
             try {
-		Log.d(TAG, "Excuting command");
-		//String[] cmd = { "/system/xbin/su", "-c", "/data/data/org.thecongers.sdrweather/nativeFolder/rtl_fm -N -f 162.546M -s 22.5k -g 50 | /data/data/org.thecongers.sdrweather/nativeFolder/multimon -a EAS -q -t raw -" };
-		String[] cmd = { "/system/xbin/su", "-c", "/data/data/org.thecongers.sdrweather/nativeFolder/multimon" };
+            	Log.d(TAG, "Excuting command");
+            	//String[] cmd = { "/system/xbin/su", "-c", "/data/data/org.thecongers.sdrweather/nativeFolder/rtl_fm -N -f 162.546M -s 22.5k -g 50 | /data/data/org.thecongers.sdrweather/nativeFolder/multimon -a EAS -q -t raw -" };
+            	String[] cmd = { "/system/xbin/su", "-c", "/data/data/org.thecongers.sdrweather/nativeFolder/multimon" };
                 mProcess = new ProcessBuilder()
                     .command(cmd)
                     .redirectErrorStream(true)
@@ -145,6 +145,7 @@ public class MainActivity extends Activity {
                 	// Display command output
                     mText.append(currentLine + "\n");
                     Log.d(TAG, "Output: " + currentLine);
+                    // Check for alert
                     if (currentLine.contains("EAS:")) {
         				Log.d(TAG, "Found EAS Alert, parsing.....");
         				// Start parsing message
