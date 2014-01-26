@@ -15,7 +15,6 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
 
@@ -58,8 +57,12 @@ public class MainActivity extends Activity {
     }
 
     public void onClickStart(View view) {
-    	mTask = new RtlTask();
-        mTask.execute();
+    	if (RootTools.isRootAvailable()) {
+    		mTask = new RtlTask();
+    		mTask.execute();
+    	} else {
+    	    // TODO Handle no root
+    	}
     }
     public void onClickStop(View view) {
     	mTask.stop();
@@ -157,6 +160,8 @@ public class MainActivity extends Activity {
         				int size = easMsg.length;
         				Log.d(TAG, "# of fields: " + size);
         				/*
+        				 * Information from: http://en.wikipedia.org/wiki/Specific_Area_Message_Encoding
+        				 * 
         				 * ORG Ñ Originator code; programmed per unit when put into operation:
         				 * * PEP Ð Primary Entry Point Station; President or other authorized national officials
         				 * * CIV Ð Civil authorities; i.e. Governor, state/local emergency management, local police/fire officials
