@@ -3,13 +3,13 @@
 
     <string name="app_name">SDRWeather</string>
     <string name="action_settings">Settings</string>
-    <string name="originator">Originator Code: </string>
-    <string name="event">Event Code: </string>
-    <string name="location">Locations: </string>
-    <string name="purgetime">Purge Time: </string>
+    <string name="originator">Originator Code:</string>
+    <string name="event">Event Code:</string>
+    <string name="location">Locations:</string>
+    <string name="purgetime">Purge Time:</string>
     <string name="issuetime">Issue Time:</string>
-    <string name="callsign">Call Sign: </string>
-    <string name="output">Command Output: </string>
+    <string name="callsign">Call Sign:</string>
+    <string name="output">Command Output:</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
 
