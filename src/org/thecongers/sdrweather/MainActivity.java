@@ -39,16 +39,10 @@ public class MainActivity extends Activity {
     	// Set execute permissions
         StringBuilder command = new StringBuilder("chmod 700 ");
         command.append(dataRoot + "/nativeFolder/multimon");
-        try {
-			Runtime.getRuntime().exec(command.toString());
-		} catch (IOException e3) {
-			// TODO Auto-generated catch block
-			e3.printStackTrace();
-		}
-        // Set execute permissions
         StringBuilder command2 = new StringBuilder("chmod 700 ");
         command2.append(dataRoot + "/nativeFolder/rtl_fm");
         try {
+			Runtime.getRuntime().exec(command.toString());
 			Runtime.getRuntime().exec(command2.toString());
 		} catch (IOException e3) {
 			// TODO Auto-generated catch block
