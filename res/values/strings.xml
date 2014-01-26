@@ -3,10 +3,19 @@
 
     <string name="app_name">SDRWeather</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
     <string name="header">Command Output</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
-    <string name="refresh">Refresh</string>
+    <string name="freq_prompt">Choose a Frequency</string>
+ 
+    <string-array name="freq_arrays">
+        <item>162.400</item>
+        <item>162.425</item>
+        <item>162.450</item>
+        <item>162.475</item>
+        <item>162.500</item>
+        <item>162.525</item>
+        <item>162.546</item>
+    </string-array>
 
 </resources>

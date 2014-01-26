@@ -12,17 +12,6 @@
        android:orientation="vertical" >
 
         <TextView
-            android:id="@+id/TextView01"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingLeft="8dip"
-            android:paddingRight="8dip"
-            android:paddingTop="8dip"
-            android:text="@string/header"
-            android:textAppearance="?android:attr/textAppearanceLarge" >
-        </TextView>
-
-        <TextView
             android:id="@+id/TextView02"
             android:layout_width="match_parent"
             android:layout_height="0dip"
@@ -34,26 +23,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" >
 
-            <Button
-                android:id="@+id/button2"
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:onClick="onClickStart"
-                android:text="@string/start" />
-
-            <Button
-                android:id="@+id/button3"
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:onClick="onClickRefresh"
-                android:text="@string/refresh" />
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent" />
 
             <Button
                 android:id="@+id/button1"
-                android:layout_width="100dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="onClickStop"
-                android:text="@string/stop" />
+                android:text="@string/start"
+        		android:onClick="onClickStart" />
+
+            <Button
+                android:id="@+id/button2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/stop"
+        		android:onClick="onClickStop" />
 
         </LinearLayout>
 

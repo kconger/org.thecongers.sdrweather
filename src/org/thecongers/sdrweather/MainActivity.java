@@ -16,6 +16,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
 import android.widget.TextView;
 
 import com.stericson.RootTools.*;
@@ -34,7 +35,7 @@ public class MainActivity extends Activity {
     	File nativeDirectory = new File(binDir);
     	nativeDirectory.mkdirs();
     	// Copy binaries
-    	copyFile("nativeFolder/multimon",dataRoot + "/nativeFolder/multimon",getBaseContext());
+    	copyFile("nativeFolder/test",dataRoot + "/nativeFolder/multimon",getBaseContext());
     	copyFile("nativeFolder/rtl_fm",dataRoot + "/nativeFolder/rtl_fm",getBaseContext());
     	// Set execute permissions
         StringBuilder command = new StringBuilder("chmod 700 ");
@@ -56,6 +57,14 @@ public class MainActivity extends Activity {
 		}
     }
 
+    public void onClickStart(View view) {
+    	mTask = new RtlTask();
+        mTask.execute();
+    }
+    public void onClickStop(View view) {
+    	mTask.stop();
+    }
+    /*
     @Override
     protected void onResume() {
         super.onResume();
@@ -67,8 +76,9 @@ public class MainActivity extends Activity {
     protected void onPause() {
         super.onPause();
         mTask.stop();
+        
     }
-
+	*/
     class RtlTask extends AsyncTask<String, Void, Void> {
         PipedOutputStream mPOut;
         PipedInputStream mPIn;
@@ -98,9 +108,9 @@ public class MainActivity extends Activity {
         @Override
         protected Void doInBackground(String... params) {
             try {
-		Log.d(TAG, "Excuting rtl_fm/multimon");
-		String[] cmd = { "/system/xbin/su", "-c", "/data/data/org.thecongers.sdrweather/nativeFolder/rtl_fm -N -f 162.546M -s 22.5k -g 50 | /data/data/org.thecongers.sdrweather/nativeFolder/multimon -a EAS -q -t raw -" };
-		//String[] cmd = { "/system/xbin/su", "-c", "/data/data/org.thecongers.sdrweather/nativeFolder/multimon" };
+		Log.d(TAG, "Excuting command");
+		//String[] cmd = { "/system/xbin/su", "-c", "/data/data/org.thecongers.sdrweather/nativeFolder/rtl_fm -N -f 162.546M -s 22.5k -g 50 | /data/data/org.thecongers.sdrweather/nativeFolder/multimon -a EAS -q -t raw -" };
+		String[] cmd = { "/system/xbin/su", "-c", "/data/data/org.thecongers.sdrweather/nativeFolder/multimon" };
                 mProcess = new ProcessBuilder()
                     .command(cmd)
                     .redirectErrorStream(true)
@@ -112,7 +122,7 @@ public class MainActivity extends Activity {
                     byte[] buffer = new byte[1024];
                     int count;
 
-                    // in -> buffer -> mPOut -> mReader -> 1 line of ping information to parse
+                    // in -> buffer -> mPOut -> mReader -> 1 line of information to parse
                     while ((count = in.read(buffer)) != -1) {
                         mPOut.write(buffer, 0, count);
                         publishProgress();
@@ -134,11 +144,73 @@ public class MainActivity extends Activity {
             try {
                 // Is a line ready to read from the command?
                 while (mReader.ready()) {
-                    // This just displays the output, you should typically parse it I guess.
-                    mText.setText(mReader.readLine());
-                    Log.d(TAG, "Output: " + mReader.readLine());
-                    if (mReader.readLine().contains("EAS")) {
-        				Log.d(TAG, "Found EAS Alert");
+                	String currentLine = mReader.readLine();
+                	// Display command output
+                    mText.append(currentLine + "\n");
+                    Log.d(TAG, "Output: " + currentLine);
+                    if (currentLine.contains("EAS:")) {
+        				Log.d(TAG, "Found EAS Alert, parsing.....");
+        				// Start parsing message
+        				String [] rawEASMsg = currentLine.split(":");
+        				rawEASMsg[1] = rawEASMsg[1].trim();
+        				String [] easMsg = rawEASMsg[1].split("-");
+        				int size = easMsg.length;
+        				Log.d(TAG, "# of fields: " + size);
+        				/*
+        				 * ORG Ñ Originator code; programmed per unit when put into operation:
+        				 * * PEP Ð Primary Entry Point Station; President or other authorized national officials
+        				 * * CIV Ð Civil authorities; i.e. Governor, state/local emergency management, local police/fire officials
+        				 * * WXR Ð National Weather Service (or Environment Canada.); Any weather-related alert
+        				 * * EAS Ð EAS Participant; Broadcasters. Generally only used with test messages.
+        				 */
+        				String org = easMsg[1];
+        				Log.d(TAG, "Originator Code: " + org);
+        				/*
+        				 * EEE Ñ Event code; programmed at time of event
+        				 */
+        				String eee = easMsg[2];
+        				Log.d(TAG, "Event Code: " + eee);
+        				/*
+        				 * PSSCCC Ñ Location codes (up to 31 location codes per message), each beginning with a dash character; 
+        				 * programmed at time of event In the United States, the first digit (P) is zero if the entire county or area 
+        				 * is included in the warning, otherwise, it is a non-zero number depending on the location of the emergency. 
+        				 * In the United States, the remaining five digits are the FIPS state code (SS) and FIPS county code (CCC). 
+        				 * The entire state may be specified by using county number 000 (three zeros). In Canada, all six digits specify 
+        				 * the Canadian Location Code, which corresponds to a specific forecast region as used by the Meteorological 
+        				 * Service of Canada. All forecast region numbers are six digits with the first digit always zero.
+        				 */
+        				String [] temp = easMsg[size - 3].split("\\+");
+        				easMsg[size - 3] = temp[0];
+        				int j=0;
+        				String [] locationCodes = new String[size - 5];
+        				for (int i=3; i < size - 2; i++) {
+        					locationCodes[j] = easMsg[i];
+        					Log.d(TAG, "Location Code: " + locationCodes[j]);
+        					j++;
+        				}
+        				/*
+        				 * TTTT Ñ In the format hhmm, using 15 minute increments up to one hour, using 30 minute increments up to six hours,
+        				 * and using hourly increments beyond six hours. Weekly and monthly tests sometimes have a 12 hour or greater
+        				 * purge time to assure users have an ample opportunity to verify reception of the test event messages; 
+        				 * however; 15 minutes is more common, especially on NOAA Weather Radio's tests.
+        				 */
+        				String purgeTime = temp[1];
+        				Log.d(TAG, "Purge time: " + purgeTime);
+        				/*
+        				 * JJJHHMM Ñ Exact time of issue, in UTC, (without time zone adjustments).
+        				 * JJJ is the Ordinal date (day) of the year, with leading zeros
+        				 * HHMM is the hours and minutes (24-hour format), in UTC, with leading zeros
+        				 */
+        				String timeOfIssue = easMsg[size - 2];
+        				Log.d(TAG, "Time of issue: " + timeOfIssue);
+        				/*
+        				 * LLLLLLLL Ñ Eight-character station callsign identification, with "/" used instead of "Ð" (such as the first eight
+        				 * letters of a cable headend's location, WABC/FM for WABC-FM, or KLOX/NWS for a weather radio station
+        				 * programmed from Los Angeles).
+        				 */
+        				String callSign = easMsg[size - 1];
+        				Log.d(TAG, "Call Sign: " + callSign);
+        				
         		    }
                     
                 }
