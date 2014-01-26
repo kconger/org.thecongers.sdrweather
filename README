@@ -1,6 +1,11 @@
 SDRWeather
-Author: Keith Congea <keith.conger@gmail.com>
-http://thecongers.org
+Author: Keith Conger <keith.conger@gmail.com>
+http://sdrweather.thecongers.org
+
+Software Used:
+rtl_tcp_andro
+
+libusb
 
 rtl_fm from rtl-sdr
 http://sdr.osmocom.org/trac/wiki/rtl-sdr
@@ -9,3 +14,5 @@ License: GPLv2
 multimonNG
 https://github.com/EliasOenal/multimonNG/
 License: GPLv2
+
+RootTools

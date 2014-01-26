@@ -81,6 +81,12 @@ public class MainActivity extends Activity {
         PipedInputStream mPIn;
         LineNumberReader mReader;
         Process mProcess;
+        TextView orgText = (TextView) findViewById(R.id.textView1);
+        TextView eeeText = (TextView) findViewById(R.id.textView2);
+        TextView locationText = (TextView) findViewById(R.id.textView3);
+        TextView purgeTimeText = (TextView) findViewById(R.id.textView4);
+        TextView issueTimeText = (TextView) findViewById(R.id.textView5);
+        TextView callsignText = (TextView) findViewById(R.id.textView6);
         TextView mText = (TextView) findViewById(R.id.TextView02);
         @Override
         protected void onPreExecute() {
@@ -165,11 +171,15 @@ public class MainActivity extends Activity {
         				 */
         				String org = easMsg[1];
         				Log.d(TAG, "Originator Code: " + org);
+        				//orgText.append("Originator Code: " + org);
+        				orgText.append(org);
         				/*
         				 * EEE Ñ Event code; programmed at time of event
         				 */
         				String eee = easMsg[2];
         				Log.d(TAG, "Event Code: " + eee);
+        				//eeeText.append("Event Code: " + eee);
+        				eeeText.append(eee);
         				/*
         				 * PSSCCC Ñ Location codes (up to 31 location codes per message), each beginning with a dash character; 
         				 * programmed at time of event In the United States, the first digit (P) is zero if the entire county or area 
@@ -186,6 +196,7 @@ public class MainActivity extends Activity {
         				for (int i=3; i < size - 2; i++) {
         					locationCodes[j] = easMsg[i];
         					Log.d(TAG, "Location Code: " + locationCodes[j]);
+        					locationText.append(locationCodes[j] + ", ");
         					j++;
         				}
         				/*
@@ -196,6 +207,8 @@ public class MainActivity extends Activity {
         				 */
         				String purgeTime = temp[1];
         				Log.d(TAG, "Purge time: " + purgeTime);
+        				//purgeTimeText.append("Purge time: " + purgeTime);
+        				purgeTimeText.append(purgeTime);
         				/*
         				 * JJJHHMM Ñ Exact time of issue, in UTC, (without time zone adjustments).
         				 * JJJ is the Ordinal date (day) of the year, with leading zeros
@@ -203,6 +216,8 @@ public class MainActivity extends Activity {
         				 */
         				String timeOfIssue = easMsg[size - 2];
         				Log.d(TAG, "Time of issue: " + timeOfIssue);
+        				//issueTimeText.append("Time of issue: " + timeOfIssue);
+        				issueTimeText.append(timeOfIssue);
         				/*
         				 * LLLLLLLL Ñ Eight-character station callsign identification, with "/" used instead of "Ð" (such as the first eight
         				 * letters of a cable headend's location, WABC/FM for WABC-FM, or KLOX/NWS for a weather radio station
@@ -210,6 +225,8 @@ public class MainActivity extends Activity {
         				 */
         				String callSign = easMsg[size - 1];
         				Log.d(TAG, "Call Sign: " + callSign);
+        				//callsignText.append("Call Sign: " + callSign);
+        				callsignText.append(callSign);
         				
         		    }
                     

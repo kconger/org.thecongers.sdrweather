@@ -11,13 +11,54 @@
        android:layout_height="wrap_content"
        android:orientation="vertical" >
 
+       <TextView
+           android:id="@+id/textView1"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:text="@string/originator"
+           android:textAppearance="?android:attr/textAppearanceSmall" />
+
+       <TextView
+           android:id="@+id/textView2"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:text="@string/event"
+           android:textAppearance="?android:attr/textAppearanceSmall" />
+
+       <TextView
+           android:id="@+id/textView3"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:text="@string/location"
+           android:textAppearance="?android:attr/textAppearanceSmall" />
+
+       <TextView
+           android:id="@+id/textView4"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:text="@string/purgetime"
+           android:textAppearance="?android:attr/textAppearanceSmall" />
+
+       <TextView
+           android:id="@+id/textView5"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:text="@string/issuetime"
+           android:textAppearance="?android:attr/textAppearanceSmall" />
+
+       <TextView
+           android:id="@+id/textView6"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:text="@string/callsign"
+           android:textAppearance="?android:attr/textAppearanceSmall" />
+
         <TextView
             android:id="@+id/TextView02"
             android:layout_width="match_parent"
             android:layout_height="0dip"
-            android:layout_weight="0.69"
-            android:text="@+id/TextView02" >
-        </TextView>
+            android:layout_weight="0.43"
+            android:text="@string/output" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -29,14 +70,14 @@
 
             <Button
                 android:id="@+id/button1"
-                android:layout_width="wrap_content"
+                android:layout_width="180dip"
                 android:layout_height="wrap_content"
                 android:text="@string/start"
         		android:onClick="onClickStart" />
 
             <Button
                 android:id="@+id/button2"
-                android:layout_width="wrap_content"
+                android:layout_width="180dip"
                 android:layout_height="wrap_content"
                 android:text="@string/stop"
         		android:onClick="onClickStop" />
