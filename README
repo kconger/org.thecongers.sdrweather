@@ -4,15 +4,19 @@ http://sdrweather.thecongers.org
 
 Software Used:
 rtl_tcp_andro
+https://github.com/martinmarinov/rtl_tcp_andro-
 
 libusb
+http://www.libusb.org/
 
 rtl_fm from rtl-sdr
 http://sdr.osmocom.org/trac/wiki/rtl-sdr
-License: GPLv2
 
 multimonNG
 https://github.com/EliasOenal/multimonNG/
-License: GPLv2
 
 RootTools
+https://github.com/Stericson/RootTools
+
+Android SQLiteAssetHelper
+https://github.com/jgilfelt/android-sqlite-asset-helper
