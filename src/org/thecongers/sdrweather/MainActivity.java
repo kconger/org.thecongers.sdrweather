@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Context;
+import android.database.Cursor;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -23,10 +24,16 @@ import com.stericson.RootTools.*;
 public class MainActivity extends Activity {
     RtlTask mTask;
     private static final String TAG = "SDRWeather";
+    
+    private Cursor events;
+    private EventDatabase db;
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        db = new EventDatabase(this);
+        
         // String dataRoot = getAppContext().getFilesDir().getParentFile().getPath();
         String dataRoot = "/data/data/org.thecongers.sdrweather";
         String binDir = dataRoot + "/nativeFolder/";
@@ -81,6 +88,8 @@ public class MainActivity extends Activity {
         PipedInputStream mPIn;
         LineNumberReader mReader;
         Process mProcess;
+        TextView evLvlText = (TextView) findViewById(R.id.textView7);
+        TextView evDescText = (TextView) findViewById(R.id.textView8);
         TextView orgText = (TextView) findViewById(R.id.textView1);
         TextView eeeText = (TextView) findViewById(R.id.textView2);
         TextView locationText = (TextView) findViewById(R.id.textView3);
@@ -227,6 +236,12 @@ public class MainActivity extends Activity {
         				Log.d(TAG, "Call Sign: " + callSign);
         				//callsignText.append("Call Sign: " + callSign);
         				callsignText.append(callSign);
+        				
+        				//Read from events database
+        				Log.d(TAG, "Looking up event code information for: " + eee);
+        				events = db.getEventInfo(eee);
+        				evLvlText.append(events.getString(events.getColumnIndex("eventlevel")));
+        				evDescText.append(events.getString(events.getColumnIndex("eventdesc")));
         				
         		    }
                     
