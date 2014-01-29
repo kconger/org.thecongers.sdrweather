@@ -9,9 +9,13 @@ import java.io.LineNumberReader;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
@@ -24,18 +28,16 @@ import com.stericson.RootTools.*;
 public class MainActivity extends Activity {
     RtlTask mTask;
     private static final String TAG = "SDRWeather";
-    
     private Cursor events;
-    private EventDatabase db;
+    private EventDatabase eventdb;
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        db = new EventDatabase(this);
+        eventdb = new EventDatabase(this);
         
-        // String dataRoot = getAppContext().getFilesDir().getParentFile().getPath();
-        String dataRoot = "/data/data/org.thecongers.sdrweather";
+        String dataRoot = getApplicationContext().getFilesDir().getParentFile().getPath();
         String binDir = dataRoot + "/nativeFolder/";
     	// Create directory for binaries
     	File nativeDirectory = new File(binDir);
@@ -51,9 +53,7 @@ public class MainActivity extends Activity {
         try {
 			Runtime.getRuntime().exec(command.toString());
 			Runtime.getRuntime().exec(command2.toString());
-		} catch (IOException e3) {
-			// TODO Auto-generated catch block
-			e3.printStackTrace();
+		} catch (IOException e) {
 		}
     }
 
@@ -121,8 +121,11 @@ public class MainActivity extends Activity {
         protected Void doInBackground(String... params) {
             try {
             	Log.d(TAG, "Excuting command");
+            	String dataRoot = getApplicationContext().getFilesDir().getParentFile().getPath();
+            	Log.d(TAG, "Got data root: "+ dataRoot);
             	//String[] cmd = { "/system/xbin/su", "-c", "/data/data/org.thecongers.sdrweather/nativeFolder/rtl_fm -N -f 162.546M -s 22.5k -g 50 | /data/data/org.thecongers.sdrweather/nativeFolder/multimon -a EAS -q -t raw -" };
-            	String[] cmd = { "/system/xbin/su", "-c", "/data/data/org.thecongers.sdrweather/nativeFolder/multimon" };
+            	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -N -f 162.546M -s 22.5k -g 50 | " + dataRoot + "/nativeFolder/multimon -a EAS -q -t raw -" };
+            	String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/multimon" };
                 mProcess = new ProcessBuilder()
                     .command(cmd)
                     .redirectErrorStream(true)
@@ -180,14 +183,12 @@ public class MainActivity extends Activity {
         				 */
         				String org = easMsg[1];
         				Log.d(TAG, "Originator Code: " + org);
-        				//orgText.append("Originator Code: " + org);
         				orgText.append(org);
         				/*
         				 * EEE Ñ Event code; programmed at time of event
         				 */
         				String eee = easMsg[2];
         				Log.d(TAG, "Event Code: " + eee);
-        				//eeeText.append("Event Code: " + eee);
         				eeeText.append(eee);
         				/*
         				 * PSSCCC Ñ Location codes (up to 31 location codes per message), each beginning with a dash character; 
@@ -216,7 +217,6 @@ public class MainActivity extends Activity {
         				 */
         				String purgeTime = temp[1];
         				Log.d(TAG, "Purge time: " + purgeTime);
-        				//purgeTimeText.append("Purge time: " + purgeTime);
         				purgeTimeText.append(purgeTime);
         				/*
         				 * JJJHHMM Ñ Exact time of issue, in UTC, (without time zone adjustments).
@@ -225,8 +225,17 @@ public class MainActivity extends Activity {
         				 */
         				String timeOfIssue = easMsg[size - 2];
         				Log.d(TAG, "Time of issue: " + timeOfIssue);
-        				//issueTimeText.append("Time of issue: " + timeOfIssue);
-        				issueTimeText.append(timeOfIssue);
+        				
+        				// Parse and convert date and time
+        				String jjj = timeOfIssue.substring(0, 3);
+        				String hh = timeOfIssue.substring(3, 5);
+        				String mm = timeOfIssue.substring(5, 7);
+        				int day = Integer.parseInt(jjj);
+        				int year = Calendar.getInstance().get(Calendar.YEAR);
+        				String convDate = formatOrdinal(year, day);
+        				Log.d(TAG, "Convert Date: " + convDate + " " + hh + ":" + mm + " UTC");
+        				issueTimeText.append(convDate + " " + hh + ":" + mm + " UTC");
+        				
         				/*
         				 * LLLLLLLL Ñ Eight-character station callsign identification, with "/" used instead of "Ð" (such as the first eight
         				 * letters of a cable headend's location, WABC/FM for WABC-FM, or KLOX/NWS for a weather radio station
@@ -234,12 +243,11 @@ public class MainActivity extends Activity {
         				 */
         				String callSign = easMsg[size - 1];
         				Log.d(TAG, "Call Sign: " + callSign);
-        				//callsignText.append("Call Sign: " + callSign);
         				callsignText.append(callSign);
         				
-        				//Read from events database
+        				//Look up event code in database, return level and description
         				Log.d(TAG, "Looking up event code information for: " + eee);
-        				events = db.getEventInfo(eee);
+        				events = eventdb.getEventInfo(eee);
         				evLvlText.append(events.getString(events.getColumnIndex("eventlevel")));
         				evDescText.append(events.getString(events.getColumnIndex("eventdesc")));
         				
@@ -268,4 +276,15 @@ public class MainActivity extends Activity {
  	        throw new RuntimeException(e);
  	    }
  	}
+ 	// Convert Ordinal date format to simple
+	@SuppressLint("SimpleDateFormat")
+	static String formatOrdinal(int year, int day) {
+		  Calendar cal = Calendar.getInstance();
+		  cal.clear();
+		  cal.set(Calendar.YEAR, year);
+		  cal.set(Calendar.DAY_OF_YEAR, day);
+		  Date date = cal.getTime();
+		  SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+		  return formatter.format(date);
+	}
 }
