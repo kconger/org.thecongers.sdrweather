@@ -217,9 +217,11 @@ public class MainActivity extends Activity {
         					String fipscode = locationCodes[j].substring(1, 6);
             				Log.d(TAG, "Looking up county/state for fips code: " + fipscode);
             				fips = fipsdb.getCountyState(fipscode);
-            				Log.d(TAG, "Location: " + fips.getString(fips.getColumnIndex("county")) + "," + fips.getString(fips.getColumnIndex("state")));
-            				countiesText.append(fips.getString(fips.getColumnIndex("county")) + "," + fips.getString(fips.getColumnIndex("state")) + "\n");
-            				
+            				if( fips != null && fips.moveToFirst() ){
+            					Log.d(TAG, "Location: " + fips.getString(fips.getColumnIndex("county")) + ", " + fips.getString(fips.getColumnIndex("state")));
+            					countiesText.append(fips.getString(fips.getColumnIndex("county")) + ", " + fips.getString(fips.getColumnIndex("state")) + "\n");
+            				}
+            				//fips.close();
         					j++;
         				}
         				/*
@@ -247,7 +249,7 @@ public class MainActivity extends Activity {
         				int year = Calendar.getInstance().get(Calendar.YEAR);
         				String convDate = formatOrdinal(year, day);
         				// TODO Convert UTC to local time
-        				Log.d(TAG, "Convert Date: " + convDate + " " + hh + ":" + mm + " UTC");
+        				Log.d(TAG, "Converted Date: " + convDate + " " + hh + ":" + mm + " UTC");
         				issueTimeText.append(convDate + " " + hh + ":" + mm + " UTC");
         				
         				/*
@@ -262,9 +264,10 @@ public class MainActivity extends Activity {
         				//Look up event code in database, return level and description
         				Log.d(TAG, "Looking up event code information for: " + eee);
         				events = eventdb.getEventInfo(eee);
-        				evLvlText.append(events.getString(events.getColumnIndex("eventlevel")));
-        				evDescText.append(events.getString(events.getColumnIndex("eventdesc")));
-        				
+        				if( events != null && events.moveToFirst() ){
+        					evLvlText.append(events.getString(events.getColumnIndex("eventlevel")));
+        					evDescText.append(events.getString(events.getColumnIndex("eventdesc")));
+        				}
         		    }
                     
                 }
