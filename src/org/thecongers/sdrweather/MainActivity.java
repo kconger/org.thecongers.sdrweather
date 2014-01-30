@@ -29,14 +29,18 @@ public class MainActivity extends Activity {
     RtlTask mTask;
     private static final String TAG = "SDRWeather";
     private Cursor events;
+    private Cursor fips;
     private EventDatabase eventdb;
+    private FipsDatabase fipsdb;
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         eventdb = new EventDatabase(this);
+        fipsdb = new FipsDatabase(this);
         
+        // Get data root
         String dataRoot = getApplicationContext().getFilesDir().getParentFile().getPath();
         String binDir = dataRoot + "/nativeFolder/";
     	// Create directory for binaries
@@ -90,6 +94,7 @@ public class MainActivity extends Activity {
         Process mProcess;
         TextView evLvlText = (TextView) findViewById(R.id.textView7);
         TextView evDescText = (TextView) findViewById(R.id.textView8);
+        TextView countiesText = (TextView) findViewById(R.id.textView9);
         TextView orgText = (TextView) findViewById(R.id.textView1);
         TextView eeeText = (TextView) findViewById(R.id.textView2);
         TextView locationText = (TextView) findViewById(R.id.textView3);
@@ -207,6 +212,14 @@ public class MainActivity extends Activity {
         					locationCodes[j] = easMsg[i];
         					Log.d(TAG, "Location Code: " + locationCodes[j]);
         					locationText.append(locationCodes[j] + ", ");
+            				
+            				//Look up fips code in database, return county and state
+        					String fipscode = locationCodes[j].substring(1, 6);
+            				Log.d(TAG, "Looking up county/state for fips code: " + fipscode);
+            				fips = fipsdb.getCountyState(fipscode);
+            				Log.d(TAG, "Location: " + fips.getString(fips.getColumnIndex("county")) + "," + fips.getString(fips.getColumnIndex("state")));
+            				countiesText.append(fips.getString(fips.getColumnIndex("county")) + "," + fips.getString(fips.getColumnIndex("state")) + "\n");
+            				
         					j++;
         				}
         				/*
@@ -233,6 +246,7 @@ public class MainActivity extends Activity {
         				int day = Integer.parseInt(jjj);
         				int year = Calendar.getInstance().get(Calendar.YEAR);
         				String convDate = formatOrdinal(year, day);
+        				// TODO Convert UTC to local time
         				Log.d(TAG, "Convert Date: " + convDate + " " + hh + ":" + mm + " UTC");
         				issueTimeText.append(convDate + " " + hh + ":" + mm + " UTC");
         				

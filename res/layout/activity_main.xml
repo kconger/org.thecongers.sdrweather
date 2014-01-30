@@ -26,6 +26,13 @@
            android:textAppearance="?android:attr/textAppearanceSmall" />
 
        <TextView
+           android:id="@+id/textView9"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:text="@string/counties"
+           android:textAppearance="?android:attr/textAppearanceSmall" />
+
+       <TextView
            android:id="@+id/textView1"
            android:layout_width="match_parent"
            android:layout_height="wrap_content"
