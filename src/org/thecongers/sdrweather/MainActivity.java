@@ -250,8 +250,10 @@ public class MainActivity extends Activity {
         				 * however; 15 minutes is more common, especially on NOAA Weather Radio's tests.
         				 */
         				String purgeTime = temp[1];
+        				String purgeTimeHour = temp[1].substring(0,2);
+        				String purgeTimeMin = temp[1].substring(2,4);
         				Log.d(TAG, "Purge time: " + purgeTime);
-        				purgeTimeText.setText("Expires in:" + purgeTime + "hhmm");
+        				purgeTimeText.setText("Expires in:" + purgeTimeHour + "h" + purgeTimeMin + "m");
         				
         				/*
         				 * JJJHHMM Ñ Exact time of issue, in UTC, (without time zone adjustments).
