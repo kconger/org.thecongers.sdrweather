@@ -16,7 +16,7 @@
            android:layout_width="match_parent"
            android:layout_height="wrap_content"
            android:text="@string/eventlevel"
-           android:textAppearance="?android:attr/textAppearanceMedium" />
+           android:textAppearance="?android:attr/textAppearanceLarge" />
 
        <TextView
            android:id="@+id/textView8"
@@ -33,24 +33,10 @@
            android:textAppearance="?android:attr/textAppearanceSmall" />
 
        <TextView
-           android:id="@+id/textView1"
+           android:id="@+id/textView5"
            android:layout_width="match_parent"
            android:layout_height="wrap_content"
-           android:text="@string/originator"
-           android:textAppearance="?android:attr/textAppearanceSmall" />
-
-       <TextView
-           android:id="@+id/textView2"
-           android:layout_width="match_parent"
-           android:layout_height="wrap_content"
-           android:text="@string/event"
-           android:textAppearance="?android:attr/textAppearanceSmall" />
-
-       <TextView
-           android:id="@+id/textView3"
-           android:layout_width="match_parent"
-           android:layout_height="wrap_content"
-           android:text="@string/location"
+           android:text="@string/issuetime"
            android:textAppearance="?android:attr/textAppearanceSmall" />
 
        <TextView
@@ -61,10 +47,10 @@
            android:textAppearance="?android:attr/textAppearanceSmall" />
 
        <TextView
-           android:id="@+id/textView5"
+           android:id="@+id/textView1"
            android:layout_width="match_parent"
            android:layout_height="wrap_content"
-           android:text="@string/issuetime"
+           android:text="@string/originator"
            android:textAppearance="?android:attr/textAppearanceSmall" />
 
        <TextView

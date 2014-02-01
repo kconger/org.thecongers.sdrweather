@@ -9,9 +9,11 @@ import java.io.LineNumberReader;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -19,6 +21,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -92,16 +95,16 @@ public class MainActivity extends Activity {
         PipedInputStream mPIn;
         LineNumberReader mReader;
         Process mProcess;
+
         TextView evLvlText = (TextView) findViewById(R.id.textView7);
         TextView evDescText = (TextView) findViewById(R.id.textView8);
         TextView countiesText = (TextView) findViewById(R.id.textView9);
         TextView orgText = (TextView) findViewById(R.id.textView1);
-        TextView eeeText = (TextView) findViewById(R.id.textView2);
-        TextView locationText = (TextView) findViewById(R.id.textView3);
         TextView purgeTimeText = (TextView) findViewById(R.id.textView4);
         TextView issueTimeText = (TextView) findViewById(R.id.textView5);
         TextView callsignText = (TextView) findViewById(R.id.textView6);
         TextView mText = (TextView) findViewById(R.id.TextView02);
+        
         @Override
         protected void onPreExecute() {
             mPOut = new PipedOutputStream();
@@ -128,7 +131,6 @@ public class MainActivity extends Activity {
             	Log.d(TAG, "Excuting command");
             	String dataRoot = getApplicationContext().getFilesDir().getParentFile().getPath();
             	Log.d(TAG, "Got data root: "+ dataRoot);
-            	//String[] cmd = { "/system/xbin/su", "-c", "/data/data/org.thecongers.sdrweather/nativeFolder/rtl_fm -N -f 162.546M -s 22.5k -g 50 | /data/data/org.thecongers.sdrweather/nativeFolder/multimon -a EAS -q -t raw -" };
             	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -N -f 162.546M -s 22.5k -g 50 | " + dataRoot + "/nativeFolder/multimon -a EAS -q -t raw -" };
             	String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/multimon" };
                 mProcess = new ProcessBuilder()
@@ -188,13 +190,30 @@ public class MainActivity extends Activity {
         				 */
         				String org = easMsg[1];
         				Log.d(TAG, "Originator Code: " + org);
-        				orgText.append(org);
+        				orgText.setText("Originator Code: " + org);
         				/*
         				 * EEE Ñ Event code; programmed at time of event
         				 */
         				String eee = easMsg[2];
         				Log.d(TAG, "Event Code: " + eee);
-        				eeeText.append(eee);
+        				//Look up event code in database, return level and description
+        				Log.d(TAG, "Looking up event code information for: " + eee);
+        				events = eventdb.getEventInfo(eee);
+        				if( events != null && events.moveToFirst() ){
+        					String eventlevel = events.getString(events.getColumnIndex("eventlevel"));
+        					evLvlText.setText(eventlevel);
+        					if("Test".equals(eventlevel)){
+        						evLvlText.setBackgroundResource(R.color.white);
+        					}else if("Warning".equals(eventlevel)){
+        						evLvlText.setBackgroundResource(R.color.red);
+        					}else if("Watch".equals(eventlevel)){
+        						evLvlText.setBackgroundResource(R.color.yellow);
+        					}else if("Advisory".equals(eventlevel)){
+        						evLvlText.setBackgroundResource(R.color.green);
+        					}
+        					evDescText.append(events.getString(events.getColumnIndex("eventdesc")));
+        				}
+        				
         				/*
         				 * PSSCCC Ñ Location codes (up to 31 location codes per message), each beginning with a dash character; 
         				 * programmed at time of event In the United States, the first digit (P) is zero if the entire county or area 
@@ -208,11 +227,11 @@ public class MainActivity extends Activity {
         				easMsg[size - 3] = temp[0];
         				int j=0;
         				String [] locationCodes = new String[size - 5];
+        				countiesText.setText("Counties Affected: ");
         				for (int i=3; i < size - 2; i++) {
         					locationCodes[j] = easMsg[i];
         					Log.d(TAG, "Location Code: " + locationCodes[j]);
-        					locationText.append(locationCodes[j] + ", ");
-            				
+
             				//Look up fips code in database, return county and state
         					String fipscode = locationCodes[j].substring(1, 6);
             				Log.d(TAG, "Looking up county/state for fips code: " + fipscode);
@@ -232,14 +251,15 @@ public class MainActivity extends Activity {
         				 */
         				String purgeTime = temp[1];
         				Log.d(TAG, "Purge time: " + purgeTime);
-        				purgeTimeText.append(purgeTime);
+        				purgeTimeText.setText("Expires in:" + purgeTime + "hhmm");
+        				
         				/*
         				 * JJJHHMM Ñ Exact time of issue, in UTC, (without time zone adjustments).
         				 * JJJ is the Ordinal date (day) of the year, with leading zeros
         				 * HHMM is the hours and minutes (24-hour format), in UTC, with leading zeros
         				 */
         				String timeOfIssue = easMsg[size - 2];
-        				Log.d(TAG, "Time of issue: " + timeOfIssue);
+        				Log.d(TAG, "Time of issue (Ordinal Date): " + timeOfIssue);
         				
         				// Parse and convert date and time
         				String jjj = timeOfIssue.substring(0, 3);
@@ -248,9 +268,17 @@ public class MainActivity extends Activity {
         				int day = Integer.parseInt(jjj);
         				int year = Calendar.getInstance().get(Calendar.YEAR);
         				String convDate = formatOrdinal(year, day);
-        				// TODO Convert UTC to local time
-        				Log.d(TAG, "Converted Date: " + convDate + " " + hh + ":" + mm + " UTC");
-        				issueTimeText.append(convDate + " " + hh + ":" + mm + " UTC");
+        				Log.d(TAG, "Time of issue (UTC): " + convDate + " " + hh + ":" + mm + " UTC");
+        				
+        				// Convert UTC to local time 
+        				SimpleDateFormat utcFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        				utcFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        				Date date = utcFormat.parse(convDate + "T" + hh + ":" + mm + ":00.000Z");
+        				SimpleDateFormat pstFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+        				pstFormat.setTimeZone(TimeZone.getDefault());
+
+        				Log.d(TAG, "Time of issue: " + pstFormat.format(date));
+        				issueTimeText.setText("Time of issue: " + pstFormat.format(date));
         				
         				/*
         				 * LLLLLLLL Ñ Eight-character station callsign identification, with "/" used instead of "Ð" (such as the first eight
@@ -259,20 +287,16 @@ public class MainActivity extends Activity {
         				 */
         				String callSign = easMsg[size - 1];
         				Log.d(TAG, "Call Sign: " + callSign);
-        				callsignText.append(callSign);
-        				
-        				//Look up event code in database, return level and description
-        				Log.d(TAG, "Looking up event code information for: " + eee);
-        				events = eventdb.getEventInfo(eee);
-        				if( events != null && events.moveToFirst() ){
-        					evLvlText.append(events.getString(events.getColumnIndex("eventlevel")));
-        					evDescText.append(events.getString(events.getColumnIndex("eventdesc")));
-        				}
+        				callsignText.setText("Call Sign: " + callSign);
+
         		    }
                     
                 }
             } catch (IOException t) {
-            }
+            } catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
     }
     // File Copy Function
@@ -301,7 +325,7 @@ public class MainActivity extends Activity {
 		  cal.set(Calendar.YEAR, year);
 		  cal.set(Calendar.DAY_OF_YEAR, day);
 		  Date date = cal.getTime();
-		  SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+		  SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 		  return formatter.format(date);
 	}
 }
