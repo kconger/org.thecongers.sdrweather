@@ -21,7 +21,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -161,7 +160,8 @@ public class MainActivity extends Activity {
             }
             return null;
         }
-        @Override
+        @SuppressLint("SimpleDateFormat")
+		@Override
         protected void onProgressUpdate(Void... values) {
             try {
                 // Is a line ready to read from the command?
@@ -211,7 +211,7 @@ public class MainActivity extends Activity {
         					}else if("Advisory".equals(eventlevel)){
         						evLvlText.setBackgroundResource(R.color.green);
         					}
-        					evDescText.append(events.getString(events.getColumnIndex("eventdesc")));
+        					evDescText.setText("Event: " + events.getString(events.getColumnIndex("eventdesc")));
         				}
         				
         				/*
@@ -250,9 +250,9 @@ public class MainActivity extends Activity {
         				 * however; 15 minutes is more common, especially on NOAA Weather Radio's tests.
         				 */
         				String purgeTime = temp[1];
-        				String purgeTimeHour = temp[1].substring(0,2);
-        				String purgeTimeMin = temp[1].substring(2,4);
         				Log.d(TAG, "Purge time: " + purgeTime);
+        				String purgeTimeHour = purgeTime.substring(0,2);
+        				String purgeTimeMin = purgeTime.substring(2,4);
         				purgeTimeText.setText("Expires in:" + purgeTimeHour + "h" + purgeTimeMin + "m");
         				
         				/*
