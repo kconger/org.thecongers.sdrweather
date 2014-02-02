@@ -23,7 +23,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
 import android.view.View;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.stericson.RootTools.*;
 
@@ -34,6 +36,7 @@ public class MainActivity extends Activity {
     private Cursor fips;
     private EventDatabase eventdb;
     private FipsDatabase fipsdb;
+    private Spinner spinner1;
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -65,10 +68,16 @@ public class MainActivity extends Activity {
 
     public void onClickStart(View view) {
     	if (RootTools.isRootAvailable()) {
+    		// Get Frequency
+    		spinner1 = (Spinner) findViewById(R.id.spinner1);
+    		String freq = String.valueOf(spinner1.getSelectedItem());
+    		// Call for process to start
     		mTask = new RtlTask();
-    		mTask.execute();
+    		mTask.execute(freq);
     	} else {
-    	    // TODO Handle no root
+    		Toast.makeText(MainActivity.this,
+    				"Root Not Available!",
+    					Toast.LENGTH_SHORT).show();
     	}
     }
     public void onClickStop(View view) {
@@ -130,6 +139,8 @@ public class MainActivity extends Activity {
             	Log.d(TAG, "Excuting command");
             	String dataRoot = getApplicationContext().getFilesDir().getParentFile().getPath();
             	Log.d(TAG, "Got data root: "+ dataRoot);
+            	Log.d(TAG, "Frequency Selected: "+ params[0]);
+            	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -N -f "+ params[0] + "M -s 22.5k -g 50 | " + dataRoot + "/nativeFolder/multimon -a EAS -q -t raw -" };
             	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -N -f 162.546M -s 22.5k -g 50 | " + dataRoot + "/nativeFolder/multimon -a EAS -q -t raw -" };
             	String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/multimon" };
                 mProcess = new ProcessBuilder()
@@ -279,7 +290,7 @@ public class MainActivity extends Activity {
         				SimpleDateFormat pstFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
         				pstFormat.setTimeZone(TimeZone.getDefault());
 
-        				Log.d(TAG, "Time of issue: " + pstFormat.format(date));
+        				Log.d(TAG, "Time of issue (Local): " + pstFormat.format(date));
         				issueTimeText.setText("Time of issue: " + pstFormat.format(date));
         				
         				/*

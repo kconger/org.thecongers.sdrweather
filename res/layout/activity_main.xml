@@ -69,6 +69,28 @@
 
         <LinearLayout
             android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center" >
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="180dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/spinner_desc"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <Spinner
+                android:id="@+id/spinner1"
+                android:layout_width="180dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:entries="@array/frequency_array" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" >
 
             <Space

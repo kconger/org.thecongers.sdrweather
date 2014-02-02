@@ -10,8 +10,18 @@
     <string name="purgetime">Purge Time:</string>
     <string name="issuetime">Issue Time:</string>
     <string name="callsign">Call Sign:</string>
-    <string name="output">Command Output:</string>
+    <string name="output">Command Output:\n</string>
+    <string name="spinner_desc">Frequency</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
 
+    <string-array name="frequency_array">
+        <item>162.400</item>
+        <item>162.425</item>
+        <item>162.450</item>
+        <item>162.475</item>
+        <item>162.500</item>
+        <item>162.525</item>
+        <item>162.550</item>
+    </string-array>
 </resources>
