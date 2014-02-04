@@ -5,7 +5,7 @@
     <string name="action_settings">Settings</string>
     <string name="eventlevel">Event Level:</string>
     <string name="eventdesc">Event Description:</string>
-    <string name="counties">Affected Counties:</string>
+    <string name="counties">Regions Affected:</string>
     <string name="originator">Originator Code:</string>
     <string name="purgetime">Purge Time:</string>
     <string name="issuetime">Issue Time:</string>
@@ -16,12 +16,33 @@
     <string name="stop">Stop</string>
 
     <string-array name="frequency_array">
-        <item>162.400</item>
-        <item>162.425</item>
-        <item>162.450</item>
-        <item>162.475</item>
-        <item>162.500</item>
-        <item>162.525</item>
-        <item>162.550</item>
+        <item name="1">162.400</item>
+        <item name="2">162.425</item>
+        <item name="3">162.450</item>
+        <item name="4">162.475</item>
+        <item name="5">162.500</item>
+        <item name="6">162.525</item>
+        <item name="7">162.550</item>
     </string-array>
+    <string-array name="frequency_arrayValues">
+        <item name="1">0</item>
+        <item name="2">1</item>
+        <item name="3">2</item>
+        <item name="4">3</item>
+        <item name="5">4</item>
+        <item name="6">5</item>
+        <item name="7">6</item>
+    </string-array>
+    
+    <string name="rtlsettings">rtl_fm Settings</string>
+    <string name="uisettings">UI Settings</string>
+    <string-array name="country">
+        <item name="1">United States</item>
+        <item name="2">Canada</item>
+    </string-array>
+    <string-array name="countryValues">
+        <item name="1">0</item>
+        <item name="2">1</item>
+    </string-array>
+
 </resources>
