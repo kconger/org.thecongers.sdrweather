@@ -87,9 +87,10 @@ public class MainActivity extends Activity {
     	if (RootTools.isRootAvailable()) {
     		//Get Frequency
     		String freq = String.valueOf(spinner1.getSelectedItem());
+    		String gain = sharedPrefs.getString("prefGain", "50");
     		// Call for process to start
     		mTask = new RtlTask();
-    		mTask.execute(freq);
+    		mTask.execute(freq,gain);
     	} else {
     		// Display message about lack of root
     		Toast.makeText(MainActivity.this,
@@ -139,26 +140,18 @@ public class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-                super.onActivityResult(requestCode, resultCode, data);
-
-                    if(requestCode==SETTINGS_RESULT)
-                    {
-                        updateUserSettings();
-                    }
-
+    	super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==SETTINGS_RESULT)
+        {
+        	updateUserSettings();
+        }
     }
     
     private void updateUserSettings() 
     {
-
-    	 Toast.makeText(MainActivity.this,
-    			"Settings Changed!",
-    			Toast.LENGTH_SHORT).show();
-         
-         int freq = Integer.parseInt(sharedPrefs.getString("prefDefaultFreq", "6"));
-         Log.d(TAG, "Freq set to: " + freq );
+    	 int freq = Integer.parseInt(sharedPrefs.getString("prefDefaultFreq", "6"));
+         Log.d(TAG, "Updating freqency spinner to index: " + freq );
          spinner1.setSelection(freq);
-
      }
 
     
@@ -170,7 +163,7 @@ public class MainActivity extends Activity {
 
         TextView evLvlText = (TextView) findViewById(R.id.textView7);
         TextView evDescText = (TextView) findViewById(R.id.textView8);
-        TextView countiesText = (TextView) findViewById(R.id.textView9);
+        TextView regionsText = (TextView) findViewById(R.id.textView9);
         TextView orgText = (TextView) findViewById(R.id.textView1);
         TextView purgeTimeText = (TextView) findViewById(R.id.textView4);
         TextView issueTimeText = (TextView) findViewById(R.id.textView5);
@@ -204,7 +197,8 @@ public class MainActivity extends Activity {
             	String dataRoot = getApplicationContext().getFilesDir().getParentFile().getPath();
             	Log.d(TAG, "Got data root: "+ dataRoot);
             	Log.d(TAG, "Frequency Selected: "+ params[0]);
-            	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -N -f " + params[0] + "M -s 22.5k -g 50 | " + dataRoot + "/nativeFolder/multimon -a EAS -q -t raw -" };
+            	Log.d(TAG, "Gain: "+ params[1]);
+            	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -N -f " + params[0] + "M -s 22.5k -g " + params[1] + " | " + dataRoot + "/nativeFolder/multimon -a EAS -q -t raw -" };
             	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -N -f 162.546M -s 22.5k -g 50 | " + dataRoot + "/nativeFolder/multimon -a EAS -q -t raw -" };
             	String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/multimon" };
                 mProcess = new ProcessBuilder()
@@ -303,7 +297,7 @@ public class MainActivity extends Activity {
         				int j=0;
         				String [] locationCodes = new String[size - 5];
         				
-        				countiesText.setText("Regions Affected: ");
+        				regionsText.setText("Regions Affected: ");
         				//Get Country From Preferences
         		        int country = Integer.parseInt(sharedPrefs.getString("prefDefaultCountry", "0"));
         		        Log.d(TAG, "Country Code: " + country);
@@ -318,25 +312,25 @@ public class MainActivity extends Activity {
         		        		fips = fipsdb.getCountyState(fipscode);
         		        		if( fips != null && fips.moveToFirst() ){
         		        			Log.d(TAG, "Location: " + fips.getString(fips.getColumnIndex("county")) + ", " + fips.getString(fips.getColumnIndex("state")));
-        		        			countiesText.append(fips.getString(fips.getColumnIndex("county")) + ", " + fips.getString(fips.getColumnIndex("state")) + "\n");
+        		        			regionsText.append(fips.getString(fips.getColumnIndex("county")) + ", " + fips.getString(fips.getColumnIndex("state")) + "\n");
         		        		}
         		        		//fips.close();
         		        		j++;
         		        	}
-        		        }else if( country ==1 ){
+        		        }else if( country == 1 ){
         		        	for (int i=3; i < size - 2; i++) {
         		        		locationCodes[j] = easMsg[i];
         		        		Log.d(TAG, "Location Code: " + locationCodes[j]);
 
-        		        		//Look up fips code in database, return county and state
+        		        		//Look up clc code in database, return region and province/territory
         		        		String clccode = locationCodes[j].substring(1, 6);
-        		        		Log.d(TAG, "Looking up region information for clc code: " + clccode);
+        		        		Log.d(TAG, "Looking up region and province/territory information for clc code: " + clccode);
         		        		clc = clcdb.getCountyState(clccode);
         		        		if( clc != null && clc.moveToFirst() ){
-        		        			Log.d(TAG, "Location: " + clc.getString(clc.getColumnIndex("county")) + ", " + clc.getString(clc.getColumnIndex("state")));
-        		        			countiesText.append(clc.getString(clc.getColumnIndex("county")) + ", " + clc.getString(clc.getColumnIndex("state")) + "\n");
+        		        			Log.d(TAG, "Location: " + clc.getString(clc.getColumnIndex("region")) + ", " + clc.getString(clc.getColumnIndex("provinceterritory")));
+        		        			regionsText.append(clc.getString(clc.getColumnIndex("region")) + ", " + clc.getString(clc.getColumnIndex("provinceterritory")) + "\n");
         		        		}
-        		        		//fips.close();
+        		        		//clc.close();
         		        		j++;
         		        	}
         		        }
@@ -373,11 +367,11 @@ public class MainActivity extends Activity {
         				SimpleDateFormat utcFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         				utcFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         				Date date = utcFormat.parse(convDate + "T" + hh + ":" + mm + ":00.000Z");
-        				SimpleDateFormat pstFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-        				pstFormat.setTimeZone(TimeZone.getDefault());
+        				SimpleDateFormat defaultFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+        				defaultFormat.setTimeZone(TimeZone.getDefault());
 
-        				Log.d(TAG, "Time of issue (Local): " + pstFormat.format(date));
-        				issueTimeText.setText("Time of issue: " + pstFormat.format(date));
+        				Log.d(TAG, "Time of issue (Local): " + defaultFormat.format(date));
+        				issueTimeText.setText("Time of issue: " + defaultFormat.format(date));
         				
         				/*
         				 * LLLLLLLL Ñ Eight-character station callsign identification, with "/" used instead of "Ð" (such as the first eight

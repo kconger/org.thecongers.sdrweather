@@ -4,9 +4,16 @@ Weather Alert Reader that uses rtl_fm to demodulate FM
 from a support rtl_sdr device and multimon-ng to decode EAS
 Messages. This may only work in the United States and Canada.
 
+Current Features:
+* Decode United States and Canadian Weather Alerts
+* Selectable Frequencies
+* Offline FIPS and CLC Location Code Database
+* Offline Event Code Database
+
 Future:
-Widget to display alerts
-Listen to the weather radio audio.
+* Alert Notifications
+* Widget to display alerts
+* Listen to the weather radio audio.
 
 Author: Keith Conger <keith.conger@gmail.com>
 http://sdrweather.thecongers.org

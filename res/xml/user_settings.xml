@@ -3,8 +3,8 @@
     <PreferenceCategory android:title="@string/uisettings" >
     	<ListPreference
             android:key="prefDefaultCountry"
-            android:title="Default Country"
-            android:summary="Set Default Country"
+            android:title="@string/pref_country_name"
+            android:summary="@string/pref_country_name"
             android:entries="@array/country"
             android:entryValues="@array/countryValues"
             />
@@ -12,10 +12,16 @@
     <PreferenceCategory android:title="@string/rtlsettings" >
     	<ListPreference
             android:key="prefDefaultFreq"
-            android:title="Default Frequency"
-            android:summary="Set Default Frequency"
+            android:title="@string/pref_freq_name"
+            android:summary="@string/pref_freq_summary"
             android:entries="@array/frequency_array"
             android:entryValues="@array/frequency_arrayValues"
+            />
+    	<EditTextPreference
+        	android:title="@string/pref_gain_name"
+            android:summary="@string/pref_gain_summary"
+            android:defaultValue="50"
+            android:key="prefGain"
             />
     </PreferenceCategory>
 
