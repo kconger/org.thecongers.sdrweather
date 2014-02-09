@@ -1,6 +1,8 @@
 package org.thecongers.sdrweather;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +17,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -46,7 +51,11 @@ public class MainActivity extends Activity {
     private Spinner spinner1;
     private SharedPreferences sharedPrefs;
     private static final int SETTINGS_RESULT = 1;
-    
+    private String dataRoot;
+    boolean m_stop = false;
+    AudioTrack m_audioTrack;
+    Thread m_audioThread;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,7 +63,7 @@ public class MainActivity extends Activity {
         eventdb = new EventDatabase(this);
         fipsdb = new FipsDatabase(this);
         clcdb = new ClcDatabase(this);
-        
+
         //Set Initial Frequency From Preferences
         spinner1 = (Spinner) findViewById(R.id.spinner1);
         sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -63,7 +72,7 @@ public class MainActivity extends Activity {
         spinner1.setSelection(freq);
         
         // Get data root
-        String dataRoot = getApplicationContext().getFilesDir().getParentFile().getPath();
+        dataRoot = getApplicationContext().getFilesDir().getParentFile().getPath();
         String binDir = dataRoot + "/nativeFolder/";
     	// Create directory for binaries
     	File nativeDirectory = new File(binDir);
@@ -108,9 +117,71 @@ public class MainActivity extends Activity {
     		}
     	}
     }
+    
     public void onClickStop(View view) {
     	mTask.stop();
     }
+    
+    public void onClickAudioStart(View view) {
+    	// Start playback
+    	Log.d(TAG, "Start Audio Touched" );
+    	audioStart();
+    }
+    
+    public void onClickAudioStop(View view) {
+    	// Stop playback
+    	Log.d(TAG, "Stop Audio Touched" );
+    	audioStop();
+    }
+    
+    Runnable m_audioGenerator = new Runnable()
+    {       
+        public void run()
+        {
+            Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+            
+            FileInputStream audioStream = null;
+            try {
+            	Log.d(TAG, "Setting nedia file to: " + dataRoot + "/pipe" );
+                audioStream = new FileInputStream(dataRoot + "/pipe");
+            } catch (FileNotFoundException e) {
+            	e.printStackTrace();
+            	Log.d(TAG, "Named Pipe Not Found" );
+            }
+            int bytesRead = 0;
+            byte [] audioData = new byte[1024];
+            Log.d(TAG, "Write Audio Out" );
+            while(!m_stop) {
+            	try {
+					bytesRead = audioStream.read(audioData, 0, 1024);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            	m_audioTrack.write(audioData, 0, bytesRead);   
+            	//m_audioTrack.write(audioData, 0, audioData.length); 
+            }
+        }
+    };
+
+    void audioStart()
+    {
+        m_stop = false;
+
+        m_audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 22050, AudioFormat.CHANNEL_OUT_MONO,
+                                        AudioFormat.ENCODING_PCM_16BIT, 22050 /* 1 second buffer */,
+                                        AudioTrack.MODE_STREAM);            
+
+        m_audioTrack.play();
+        m_audioThread = new Thread(m_audioGenerator);
+        m_audioThread.start();
+    }
+
+    void audioStop()
+    {
+        m_stop = true;          
+        m_audioTrack.stop();
+    }   
     /*
     @Override
     protected void onResume() {
@@ -133,6 +204,7 @@ public class MainActivity extends Activity {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
+    
     // When Settings Menu is selected
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -147,6 +219,7 @@ public class MainActivity extends Activity {
                 return super.onOptionsItemSelected(item);
     	}
     }
+    
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
@@ -163,8 +236,7 @@ public class MainActivity extends Activity {
          Log.d(TAG, "Updating freqency spinner to index: " + freq );
          spinner1.setSelection(freq);
      }
-
-    
+ 
     class RtlTask extends AsyncTask<String, Void, Void> {
         PipedOutputStream mPOut;
         PipedInputStream mPIn;
@@ -198,6 +270,16 @@ public class MainActivity extends Activity {
                 p.destroy();
             }
             cancel(true);
+            // Kill Processes Fail Safe
+            StringBuilder command1 = new StringBuilder("/system/xbin/su -c killall -9 ");
+            command1.append("rtl_fm");
+            StringBuilder command2 = new StringBuilder("/system/xbin/su -c killall -9 ");
+            command2.append("multimon-ng");
+            try {
+    			Runtime.getRuntime().exec(command1.toString());
+    			Runtime.getRuntime().exec(command2.toString());
+    		} catch (IOException e) {
+    		}
         }
 
         @Override
@@ -398,6 +480,10 @@ public class MainActivity extends Activity {
         				
         					}
 
+        		    } else if (currentLine.contains("No supported devices found")) {
+        		    	Toast.makeText(MainActivity.this,
+            					"No supported device found!",
+            					Toast.LENGTH_SHORT).show();
         		    }
                     
                 }
@@ -408,6 +494,7 @@ public class MainActivity extends Activity {
 			}
         }
     }
+    
     // File Copy Function
  	private static void copyFile(String assetPath, String localPath, Context context) {
  	    try {
@@ -426,6 +513,7 @@ public class MainActivity extends Activity {
  	        throw new RuntimeException(e);
  	    }
  	}
+ 	
  	// Convert Ordinal date format to simple
 	@SuppressLint("SimpleDateFormat")
 	static String formatOrdinal(int year, int day) {
