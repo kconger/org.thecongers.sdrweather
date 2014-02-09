@@ -4,7 +4,7 @@
     	<ListPreference
             android:key="prefDefaultCountry"
             android:title="@string/pref_country_name"
-            android:summary="@string/pref_country_name"
+            android:summary="@string/pref_country_summary"
             android:entries="@array/country"
             android:entryValues="@array/countryValues"
             />

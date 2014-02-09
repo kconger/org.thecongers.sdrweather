@@ -15,6 +15,7 @@
            android:id="@+id/textView7"
            android:layout_width="match_parent"
            android:layout_height="wrap_content"
+           android:layout_gravity="top"
            android:text="@string/eventlevel"
            android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -23,13 +24,6 @@
            android:layout_width="match_parent"
            android:layout_height="wrap_content"
            android:text="@string/eventdesc"
-           android:textAppearance="?android:attr/textAppearanceSmall" />
-
-       <TextView
-           android:id="@+id/textView9"
-           android:layout_width="match_parent"
-           android:layout_height="wrap_content"
-           android:text="@string/counties"
            android:textAppearance="?android:attr/textAppearanceSmall" />
 
        <TextView
@@ -60,12 +54,19 @@
            android:text="@string/callsign"
            android:textAppearance="?android:attr/textAppearanceSmall" />
 
-        <TextView
-            android:id="@+id/TextView02"
-            android:layout_width="match_parent"
-            android:layout_height="0dip"
-            android:layout_weight="0.43"
-            android:text="@string/output" />
+       <TextView
+           android:id="@+id/textView9"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:text="@string/counties"
+           android:textAppearance="?android:attr/textAppearanceSmall" />
+
+       <TextView
+           android:id="@+id/TextView02"
+           android:layout_width="match_parent"
+           android:layout_height="0dip"
+           android:layout_weight="0.43"
+           android:text="@string/output" />
 
         <LinearLayout
             android:layout_width="match_parent"

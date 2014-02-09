@@ -69,22 +69,27 @@ public class MainActivity extends Activity {
     	File nativeDirectory = new File(binDir);
     	nativeDirectory.mkdirs();
     	// Copy binaries
-    	copyFile("nativeFolder/test",dataRoot + "/nativeFolder/multimon",getBaseContext());
+    	//copyFile("nativeFolder/test",dataRoot + "/nativeFolder/multimon-ng",getBaseContext());
+    	copyFile("nativeFolder/multimon-ng",dataRoot + "/nativeFolder/multimon-ng",getBaseContext());
     	copyFile("nativeFolder/rtl_fm",dataRoot + "/nativeFolder/rtl_fm",getBaseContext());
     	// Set execute permissions
         StringBuilder command = new StringBuilder("chmod 700 ");
-        command.append(dataRoot + "/nativeFolder/multimon");
+        command.append(dataRoot + "/nativeFolder/multimon-ng");
         StringBuilder command2 = new StringBuilder("chmod 700 ");
         command2.append(dataRoot + "/nativeFolder/rtl_fm");
+        // Create named pipe for audio
+        StringBuilder command3 = new StringBuilder("mkfifo ");
+        command3.append(dataRoot + "/pipe");
         try {
 			Runtime.getRuntime().exec(command.toString());
 			Runtime.getRuntime().exec(command2.toString());
+			Runtime.getRuntime().exec(command3.toString());
 		} catch (IOException e) {
 		}
     }
 
     public void onClickStart(View view) {
-    	if (RootTools.isRootAvailable()) {
+    	if (RootTools.isRootAvailable() && RootTools.isBusyboxAvailable()) {
     		//Get Frequency
     		String freq = String.valueOf(spinner1.getSelectedItem());
     		String gain = sharedPrefs.getString("prefGain", "50");
@@ -93,9 +98,14 @@ public class MainActivity extends Activity {
     		mTask.execute(freq,gain);
     	} else {
     		// Display message about lack of root
-    		Toast.makeText(MainActivity.this,
-    				"Root Not Available!",
+    		if (RootTools.isRootAvailable()) {
+    			Toast.makeText(MainActivity.this,
+    					"Root Access Not Available!",
     					Toast.LENGTH_SHORT).show();
+    		} else if (RootTools.isBusyboxAvailable()) {
+    			RootTools.offerBusyBox(MainActivity.this);
+    			
+    		}
     	}
     }
     public void onClickStop(View view) {
@@ -198,9 +208,10 @@ public class MainActivity extends Activity {
             	Log.d(TAG, "Got data root: "+ dataRoot);
             	Log.d(TAG, "Frequency Selected: "+ params[0]);
             	Log.d(TAG, "Gain: "+ params[1]);
-            	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -N -f " + params[0] + "M -s 22.5k -g " + params[1] + " | " + dataRoot + "/nativeFolder/multimon -a EAS -q -t raw -" };
-            	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -N -f 162.546M -s 22.5k -g 50 | " + dataRoot + "/nativeFolder/multimon -a EAS -q -t raw -" };
-            	String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/multimon" };
+            	String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -N -f " + params[0] + "M -s 22.5k -g " + params[1] + " | tee " + dataRoot + "/pipe | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
+            	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -N -f " + params[0] + "M -s 22.5k -g " + params[1] + " | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
+            	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -N -f 162.546M -s 22.5k -g 50 | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
+            	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/multimon-ng" };
                 mProcess = new ProcessBuilder()
                     .command(cmd)
                     .redirectErrorStream(true)
@@ -248,139 +259,144 @@ public class MainActivity extends Activity {
         				String [] easMsg = rawEASMsg[1].split("-");
         				int size = easMsg.length;
         				Log.d(TAG, "# of fields: " + size);
-        				/*
-        				 * Information from: http://en.wikipedia.org/wiki/Specific_Area_Message_Encoding
-        				 * 
-        				 * ORG Ñ Originator code; programmed per unit when put into operation:
-        				 * * PEP Ð Primary Entry Point Station; President or other authorized national officials
-        				 * * CIV Ð Civil authorities; i.e. Governor, state/local emergency management, local police/fire officials
-        				 * * WXR Ð National Weather Service (or Environment Canada.); Any weather-related alert
-        				 * * EAS Ð EAS Participant; Broadcasters. Generally only used with test messages.
-        				 */
-        				String org = easMsg[1];
-        				Log.d(TAG, "Originator Code: " + org);
-        				orgText.setText("Originator Code: " + org);
-        				/*
-        				 * EEE Ñ Event code; programmed at time of event
-        				 */
-        				String eee = easMsg[2];
-        				Log.d(TAG, "Event Code: " + eee);
-        				//Look up event code in database, return level and description
-        				Log.d(TAG, "Looking up event code information for: " + eee);
-        				events = eventdb.getEventInfo(eee);
-        				if( events != null && events.moveToFirst() ){
-        					String eventlevel = events.getString(events.getColumnIndex("eventlevel"));
-        					evLvlText.setText(eventlevel);
-        					if("Test".equals(eventlevel)){
-        						evLvlText.setBackgroundResource(R.color.white);
-        					}else if("Warning".equals(eventlevel)){
-        						evLvlText.setBackgroundResource(R.color.red);
-        					}else if("Watch".equals(eventlevel)){
-        						evLvlText.setBackgroundResource(R.color.yellow);
-        					}else if("Advisory".equals(eventlevel)){
-        						evLvlText.setBackgroundResource(R.color.green);
+        				
+        				//Check to see if its a real message
+        				if (size > 5 ) {
+        					/*
+        					 * Information from: http://en.wikipedia.org/wiki/Specific_Area_Message_Encoding
+        					 * 
+        					 * ORG Ñ Originator code; programmed per unit when put into operation:
+        					 * * PEP Ð Primary Entry Point Station; President or other authorized national officials
+        					 * * CIV Ð Civil authorities; i.e. Governor, state/local emergency management, local police/fire officials
+        					 * * WXR Ð National Weather Service (or Environment Canada.); Any weather-related alert
+        					 * * EAS Ð EAS Participant; Broadcasters. Generally only used with test messages.
+        					 */
+        					String org = easMsg[1];
+        					Log.d(TAG, "Originator Code: " + org);
+        					orgText.setText("Originator Code: " + org);
+        					/*
+        					 * EEE Ñ Event code; programmed at time of event
+        					 */
+        					String eee = easMsg[2];
+        					Log.d(TAG, "Event Code: " + eee);
+        					//Look up event code in database, return level and description
+        					Log.d(TAG, "Looking up event code information for: " + eee);
+        					events = eventdb.getEventInfo(eee);
+        					if( events != null && events.moveToFirst() ){
+        						String eventlevel = events.getString(events.getColumnIndex("eventlevel"));
+        						evLvlText.setText(eventlevel);
+        						if("Test".equals(eventlevel)){
+        							evLvlText.setBackgroundResource(R.color.white);
+        						}else if("Warning".equals(eventlevel)){
+        							evLvlText.setBackgroundResource(R.color.red);
+        						}else if("Watch".equals(eventlevel)){
+        							evLvlText.setBackgroundResource(R.color.yellow);
+        						}else if("Advisory".equals(eventlevel)){
+        							evLvlText.setBackgroundResource(R.color.green);
+        						}
+        						evDescText.setText("Event: " + events.getString(events.getColumnIndex("eventdesc")));
         					}
-        					evDescText.setText("Event: " + events.getString(events.getColumnIndex("eventdesc")));
-        				}
-        				
-        				/*
-        				 * PSSCCC Ñ Location codes (up to 31 location codes per message), each beginning with a dash character; 
-        				 * programmed at time of event In the United States, the first digit (P) is zero if the entire county or area 
-        				 * is included in the warning, otherwise, it is a non-zero number depending on the location of the emergency. 
-        				 * In the United States, the remaining five digits are the FIPS state code (SS) and FIPS county code (CCC). 
-        				 * The entire state may be specified by using county number 000 (three zeros). In Canada, all six digits specify 
-        				 * the Canadian Location Code, which corresponds to a specific forecast region as used by the Meteorological 
-        				 * Service of Canada. All forecast region numbers are six digits with the first digit always zero.
-        				 */
-        				String [] temp = easMsg[size - 3].split("\\+");
-        				easMsg[size - 3] = temp[0];
-        				int j=0;
-        				String [] locationCodes = new String[size - 5];
-        				
-        				regionsText.setText("Regions Affected: ");
-        				//Get Country From Preferences
-        		        int country = Integer.parseInt(sharedPrefs.getString("prefDefaultCountry", "0"));
-        		        Log.d(TAG, "Country Code: " + country);
-        		        if( country == 0 ){
-        		        	for (int i=3; i < size - 2; i++) {
-        		        		locationCodes[j] = easMsg[i];
-        		        		Log.d(TAG, "Location Code: " + locationCodes[j]);
+        					
+        					/*
+        					 * PSSCCC Ñ Location codes (up to 31 location codes per message), each beginning with a dash character; 
+        					 * programmed at time of event In the United States, the first digit (P) is zero if the entire county or area 
+        					 * is included in the warning, otherwise, it is a non-zero number depending on the location of the emergency. 
+        					 * In the United States, the remaining five digits are the FIPS state code (SS) and FIPS county code (CCC). 
+        					 * The entire state may be specified by using county number 000 (three zeros). In Canada, all six digits specify 
+        					 * the Canadian Location Code, which corresponds to a specific forecast region as used by the Meteorological 
+        					 * Service of Canada. All forecast region numbers are six digits with the first digit always zero.
+        					 */
+        					String [] temp = easMsg[size - 3].split("\\+");
+        					easMsg[size - 3] = temp[0];
+        					int j=0;
+        					String [] locationCodes = new String[size - 5];
+        					
+        					regionsText.setText("Regions Affected: ");
+        					//Get Country From Preferences
+        					int country = Integer.parseInt(sharedPrefs.getString("prefDefaultCountry", "0"));
+        					Log.d(TAG, "Country Code: " + country);
+        					if( country == 0 ){
+        						for (int i=3; i < size - 2; i++) {
+        							locationCodes[j] = easMsg[i];
+        							Log.d(TAG, "Location Code: " + locationCodes[j]);
+        							
+        							//Look up fips code in database, return county and state
+        							String fipscode = locationCodes[j].substring(1, 6);
+        							Log.d(TAG, "Looking up county/state for fips code: " + fipscode);
+        							fips = fipsdb.getCountyState(fipscode);
+        							if( fips != null && fips.moveToFirst() ){
+        								Log.d(TAG, "Location: " + fips.getString(fips.getColumnIndex("county")) + ", " + fips.getString(fips.getColumnIndex("state")));
+        								regionsText.append(fips.getString(fips.getColumnIndex("county")) + ", " + fips.getString(fips.getColumnIndex("state")) + "\n");
+        							}
+        							//fips.close();
+        							j++;
+        						}
+        					}else if( country == 1 ){
+        						for (int i=3; i < size - 2; i++) {
+        							locationCodes[j] = easMsg[i];
+        							Log.d(TAG, "Location Code: " + locationCodes[j]);
 
-        		        		//Look up fips code in database, return county and state
-        		        		String fipscode = locationCodes[j].substring(1, 6);
-        		        		Log.d(TAG, "Looking up county/state for fips code: " + fipscode);
-        		        		fips = fipsdb.getCountyState(fipscode);
-        		        		if( fips != null && fips.moveToFirst() ){
-        		        			Log.d(TAG, "Location: " + fips.getString(fips.getColumnIndex("county")) + ", " + fips.getString(fips.getColumnIndex("state")));
-        		        			regionsText.append(fips.getString(fips.getColumnIndex("county")) + ", " + fips.getString(fips.getColumnIndex("state")) + "\n");
-        		        		}
-        		        		//fips.close();
-        		        		j++;
-        		        	}
-        		        }else if( country == 1 ){
-        		        	for (int i=3; i < size - 2; i++) {
-        		        		locationCodes[j] = easMsg[i];
-        		        		Log.d(TAG, "Location Code: " + locationCodes[j]);
-
-        		        		//Look up clc code in database, return region and province/territory
-        		        		String clccode = locationCodes[j].substring(1, 6);
-        		        		Log.d(TAG, "Looking up region and province/territory information for clc code: " + clccode);
-        		        		clc = clcdb.getCountyState(clccode);
-        		        		if( clc != null && clc.moveToFirst() ){
-        		        			Log.d(TAG, "Location: " + clc.getString(clc.getColumnIndex("region")) + ", " + clc.getString(clc.getColumnIndex("provinceterritory")));
-        		        			regionsText.append(clc.getString(clc.getColumnIndex("region")) + ", " + clc.getString(clc.getColumnIndex("provinceterritory")) + "\n");
-        		        		}
-        		        		//clc.close();
-        		        		j++;
-        		        	}
-        		        }
-        				/*
-        				 * TTTT Ñ In the format hhmm, using 15 minute increments up to one hour, using 30 minute increments up to six hours,
-        				 * and using hourly increments beyond six hours. Weekly and monthly tests sometimes have a 12 hour or greater
-        				 * purge time to assure users have an ample opportunity to verify reception of the test event messages; 
-        				 * however; 15 minutes is more common, especially on NOAA Weather Radio's tests.
-        				 */
-        				String purgeTime = temp[1];
-        				Log.d(TAG, "Purge time: " + purgeTime);
-        				String purgeTimeHour = purgeTime.substring(0,2);
-        				String purgeTimeMin = purgeTime.substring(2,4);
-        				purgeTimeText.setText("Expires in:" + purgeTimeHour + "h" + purgeTimeMin + "m");
+        							//Look up clc code in database, return region and province/territory
+        							String clccode = locationCodes[j].substring(1, 6);
+        							Log.d(TAG, "Looking up region and province/territory information for clc code: " + clccode);
+        							clc = clcdb.getCountyState(clccode);
+        							if( clc != null && clc.moveToFirst() ){
+        								Log.d(TAG, "Location: " + clc.getString(clc.getColumnIndex("region")) + ", " + clc.getString(clc.getColumnIndex("provinceterritory")));
+        								regionsText.append(clc.getString(clc.getColumnIndex("region")) + ", " + clc.getString(clc.getColumnIndex("provinceterritory")) + "\n");
+        							}
+        							//clc.close();
+        							j++;
+        						}
+        					}
+        					/*
+        					 * TTTT Ñ In the format hhmm, using 15 minute increments up to one hour, using 30 minute increments up to six hours,
+        					 * and using hourly increments beyond six hours. Weekly and monthly tests sometimes have a 12 hour or greater
+        					 * purge time to assure users have an ample opportunity to verify reception of the test event messages; 
+        					 * however; 15 minutes is more common, especially on NOAA Weather Radio's tests.
+        					 */
+        					String purgeTime = temp[1];
+        					Log.d(TAG, "Purge time: " + purgeTime);
+        					String purgeTimeHour = purgeTime.substring(0,2);
+        					String purgeTimeMin = purgeTime.substring(2,4);
+        					purgeTimeText.setText("Expires in:" + purgeTimeHour + "h" + purgeTimeMin + "m");
         				
-        				/*
-        				 * JJJHHMM Ñ Exact time of issue, in UTC, (without time zone adjustments).
-        				 * JJJ is the Ordinal date (day) of the year, with leading zeros
-        				 * HHMM is the hours and minutes (24-hour format), in UTC, with leading zeros
-        				 */
-        				String timeOfIssue = easMsg[size - 2];
-        				Log.d(TAG, "Time of issue (Ordinal Date): " + timeOfIssue);
+        					/*
+        					 * JJJHHMM Ñ Exact time of issue, in UTC, (without time zone adjustments).
+        					 * JJJ is the Ordinal date (day) of the year, with leading zeros
+        					 * HHMM is the hours and minutes (24-hour format), in UTC, with leading zeros
+        					 */
+        					String timeOfIssue = easMsg[size - 2];
+        					Log.d(TAG, "Time of issue (Ordinal Date): " + timeOfIssue);
         				
-        				// Parse and convert date and time
-        				String jjj = timeOfIssue.substring(0, 3);
-        				String hh = timeOfIssue.substring(3, 5);
-        				String mm = timeOfIssue.substring(5, 7);
-        				int day = Integer.parseInt(jjj);
-        				int year = Calendar.getInstance().get(Calendar.YEAR);
-        				String convDate = formatOrdinal(year, day);
-        				Log.d(TAG, "Time of issue (UTC): " + convDate + " " + hh + ":" + mm + " UTC");
+        					// Parse and convert date and time
+        					String jjj = timeOfIssue.substring(0, 3);
+        					String hh = timeOfIssue.substring(3, 5);
+        					String mm = timeOfIssue.substring(5, 7);
+        					int day = Integer.parseInt(jjj);
+        					int year = Calendar.getInstance().get(Calendar.YEAR);
+        					String convDate = formatOrdinal(year, day);
+        					Log.d(TAG, "Time of issue (UTC): " + convDate + " " + hh + ":" + mm + " UTC");
         				
-        				// Convert UTC to local time 
-        				SimpleDateFormat utcFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        				utcFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        				Date date = utcFormat.parse(convDate + "T" + hh + ":" + mm + ":00.000Z");
-        				SimpleDateFormat defaultFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-        				defaultFormat.setTimeZone(TimeZone.getDefault());
-
-        				Log.d(TAG, "Time of issue (Local): " + defaultFormat.format(date));
-        				issueTimeText.setText("Time of issue: " + defaultFormat.format(date));
+        					// Convert UTC to local time 
+        					SimpleDateFormat utcFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        					utcFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        					Date date = utcFormat.parse(convDate + "T" + hh + ":" + mm + ":00.000Z");
+        					SimpleDateFormat defaultFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+        					defaultFormat.setTimeZone(TimeZone.getDefault());
+        					
+        					Log.d(TAG, "Time of issue (Local): " + defaultFormat.format(date));
+        					issueTimeText.setText("Time of issue: " + defaultFormat.format(date));
         				
-        				/*
-        				 * LLLLLLLL Ñ Eight-character station callsign identification, with "/" used instead of "Ð" (such as the first eight
-        				 * letters of a cable headend's location, WABC/FM for WABC-FM, or KLOX/NWS for a weather radio station
-        				 * programmed from Los Angeles).
-        				 */
-        				String callSign = easMsg[size - 1];
-        				Log.d(TAG, "Call Sign: " + callSign);
-        				callsignText.setText("Call Sign: " + callSign);
+        					/*
+        					 * LLLLLLLL Ñ Eight-character station callsign identification, with "/" used instead of "Ð" (such as the first eight
+        					 * letters of a cable headend's location, WABC/FM for WABC-FM, or KLOX/NWS for a weather radio station
+        					 * programmed from Los Angeles).
+        					 */
+        					String callSign = easMsg[size - 1];
+        					Log.d(TAG, "Call Sign: " + callSign);
+        					callsignText.setText("Call Sign: " + callSign);
+        				
+        					}
 
         		    }
                     
