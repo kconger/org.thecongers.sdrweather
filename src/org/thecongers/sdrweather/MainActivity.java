@@ -25,6 +25,10 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Notification;
+import android.app.Notification.Builder;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -78,8 +82,8 @@ public class MainActivity extends Activity {
     	File nativeDirectory = new File(binDir);
     	nativeDirectory.mkdirs();
     	// Copy binaries
-    	//copyFile("nativeFolder/test",dataRoot + "/nativeFolder/multimon-ng",getBaseContext());
-    	copyFile("nativeFolder/multimon-ng",dataRoot + "/nativeFolder/multimon-ng",getBaseContext());
+    	copyFile("nativeFolder/test",dataRoot + "/nativeFolder/multimon-ng",getBaseContext());
+    	//copyFile("nativeFolder/multimon-ng",dataRoot + "/nativeFolder/multimon-ng",getBaseContext());
     	copyFile("nativeFolder/rtl_fm",dataRoot + "/nativeFolder/rtl_fm",getBaseContext());
     	// Set execute permissions
         StringBuilder command = new StringBuilder("chmod 700 ");
@@ -236,6 +240,24 @@ public class MainActivity extends Activity {
          Log.d(TAG, "Updating freqency spinner to index: " + freq );
          spinner1.setSelection(freq);
      }
+    
+    private void Notify(String notificationTitle, String notificationMessage, int notificationID) {
+    	  NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+    	  Intent notificationIntent = new Intent(this, MainActivity.class);
+    	  PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+    	    	    notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+    	  // Build notification
+    	  Notification.Builder builder = new Notification.Builder(this);
+    	  builder.setContentTitle(notificationTitle)
+          	.setContentText(notificationMessage)
+          	.setSmallIcon(R.drawable.ic_launcher)
+          	.setContentIntent(pendingIntent);
+    	  Notification notification = builder.build();
+    	  // Hide notification after its been selected
+    	  notification.flags |= Notification.FLAG_AUTO_CANCEL;
+    	  // Send notification
+    	  notificationManager.notify(notificationID, notification);
+    	 }
  
     class RtlTask extends AsyncTask<String, Void, Void> {
         PipedOutputStream mPOut;
@@ -290,10 +312,8 @@ public class MainActivity extends Activity {
             	Log.d(TAG, "Got data root: "+ dataRoot);
             	Log.d(TAG, "Frequency Selected: "+ params[0]);
             	Log.d(TAG, "Gain: "+ params[1]);
-            	String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -N -f " + params[0] + "M -s 22.5k -g " + params[1] + " | tee " + dataRoot + "/pipe | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
-            	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -N -f " + params[0] + "M -s 22.5k -g " + params[1] + " | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
-            	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -N -f 162.546M -s 22.5k -g 50 | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
-            	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/multimon-ng" };
+            	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -N -f " + params[0] + "M -s 22.5k -g " + params[1] + " | tee " + dataRoot + "/pipe | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
+            	String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/multimon-ng" };
                 mProcess = new ProcessBuilder()
                     .command(cmd)
                     .redirectErrorStream(true)
@@ -335,6 +355,13 @@ public class MainActivity extends Activity {
                     // Check for alert
                     if (currentLine.contains("EAS:")) {
         				Log.d(TAG, "Found EAS Alert, parsing.....");
+        				String org = null;
+        				String eventlevel = null;
+        				String eventdesc = null;
+        				String localTimeOfIssue = null;
+        				String callSign = null;
+        				int notificationID = 0;
+        				
         				// Start parsing message
         				String [] rawEASMsg = currentLine.split(":");
         				rawEASMsg[1] = rawEASMsg[1].trim();
@@ -353,7 +380,7 @@ public class MainActivity extends Activity {
         					 * * WXR Ð National Weather Service (or Environment Canada.); Any weather-related alert
         					 * * EAS Ð EAS Participant; Broadcasters. Generally only used with test messages.
         					 */
-        					String org = easMsg[1];
+        					org = easMsg[1];
         					Log.d(TAG, "Originator Code: " + org);
         					orgText.setText("Originator Code: " + org);
         					/*
@@ -365,18 +392,23 @@ public class MainActivity extends Activity {
         					Log.d(TAG, "Looking up event code information for: " + eee);
         					events = eventdb.getEventInfo(eee);
         					if( events != null && events.moveToFirst() ){
-        						String eventlevel = events.getString(events.getColumnIndex("eventlevel"));
+        						eventlevel = events.getString(events.getColumnIndex("eventlevel"));
         						evLvlText.setText(eventlevel);
         						if("Test".equals(eventlevel)){
         							evLvlText.setBackgroundResource(R.color.white);
+        							notificationID = 1;
         						}else if("Warning".equals(eventlevel)){
         							evLvlText.setBackgroundResource(R.color.red);
+        							notificationID = 2;
         						}else if("Watch".equals(eventlevel)){
         							evLvlText.setBackgroundResource(R.color.yellow);
+        							notificationID = 3;
         						}else if("Advisory".equals(eventlevel)){
         							evLvlText.setBackgroundResource(R.color.green);
+        							notificationID = 4;
         						}
-        						evDescText.setText("Event: " + events.getString(events.getColumnIndex("eventdesc")));
+        						eventdesc = events.getString(events.getColumnIndex("eventdesc"));
+        						evDescText.setText("Event: " + eventdesc);
         					}
         					
         					/*
@@ -466,17 +498,22 @@ public class MainActivity extends Activity {
         					SimpleDateFormat defaultFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
         					defaultFormat.setTimeZone(TimeZone.getDefault());
         					
-        					Log.d(TAG, "Time of issue (Local): " + defaultFormat.format(date));
-        					issueTimeText.setText("Time of issue: " + defaultFormat.format(date));
+        					localTimeOfIssue = defaultFormat.format(date);
+        					Log.d(TAG, "Time of issue (Local): " + localTimeOfIssue);
+        					issueTimeText.setText("Time of issue: " + localTimeOfIssue);
         				
         					/*
         					 * LLLLLLLL Ñ Eight-character station callsign identification, with "/" used instead of "Ð" (such as the first eight
         					 * letters of a cable headend's location, WABC/FM for WABC-FM, or KLOX/NWS for a weather radio station
         					 * programmed from Los Angeles).
         					 */
-        					String callSign = easMsg[size - 1];
+        					callSign = easMsg[size - 1];
         					Log.d(TAG, "Call Sign: " + callSign);
         					callsignText.setText("Call Sign: " + callSign);
+        					
+        					// Send a notification
+        					Notify("EAS " + eventlevel + " from " + callSign,
+        							eventdesc + " was issued", notificationID);
         				
         					}
 
