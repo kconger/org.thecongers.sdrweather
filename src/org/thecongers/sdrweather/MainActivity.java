@@ -37,6 +37,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -59,15 +61,20 @@ public class MainActivity extends Activity {
     boolean m_stop = false;
     AudioTrack m_audioTrack;
     Thread m_audioThread;
+    
+    //ImageButton playButten;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         eventdb = new EventDatabase(this);
         fipsdb = new FipsDatabase(this);
         clcdb = new ClcDatabase(this);
 
+        //playButten=(ImageButton)findViewById(R.id.imageButton1);
+        
         //Set Initial Frequency From Preferences
         spinner1 = (Spinner) findViewById(R.id.spinner1);
         sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -82,8 +89,8 @@ public class MainActivity extends Activity {
     	File nativeDirectory = new File(binDir);
     	nativeDirectory.mkdirs();
     	// Copy binaries
-    	copyFile("nativeFolder/test",dataRoot + "/nativeFolder/multimon-ng",getBaseContext());
-    	//copyFile("nativeFolder/multimon-ng",dataRoot + "/nativeFolder/multimon-ng",getBaseContext());
+    	//copyFile("nativeFolder/test",dataRoot + "/nativeFolder/multimon-ng",getBaseContext());
+    	copyFile("nativeFolder/multimon-ng",dataRoot + "/nativeFolder/multimon-ng",getBaseContext());
     	copyFile("nativeFolder/rtl_fm",dataRoot + "/nativeFolder/rtl_fm",getBaseContext());
     	// Set execute permissions
         StringBuilder command = new StringBuilder("chmod 700 ");
@@ -101,11 +108,12 @@ public class MainActivity extends Activity {
 		}
     }
 
-    public void onClickStart(View view) {
+    public void onClickStart(View view)
+    {
     	if (RootTools.isRootAvailable() && RootTools.isBusyboxAvailable()) {
-    		//Get Frequency
+    		// Get Frequency and gain
     		String freq = String.valueOf(spinner1.getSelectedItem());
-    		String gain = sharedPrefs.getString("prefGain", "50");
+    		String gain = sharedPrefs.getString("prefGain", "42");
     		// Call for process to start
     		mTask = new RtlTask();
     		mTask.execute(freq,gain);
@@ -116,26 +124,34 @@ public class MainActivity extends Activity {
     					"Root Access Not Available!",
     					Toast.LENGTH_SHORT).show();
     		} else if (RootTools.isBusyboxAvailable()) {
-    			RootTools.offerBusyBox(MainActivity.this);
-    			
+    			RootTools.offerBusyBox(MainActivity.this);   			
     		}
     	}
     }
     
-    public void onClickStop(View view) {
+    public void onClickStop(View view)
+    {
     	mTask.stop();
     }
     
-    public void onClickAudioStart(View view) {
+    public void onClickAudioStart(View view)
+    {
     	// Start playback
-    	Log.d(TAG, "Start Audio Touched" );
+    	Log.d(TAG, "Start audio pressed" );
     	audioStart();
+    	
+    	//playButten.setEnabled(false);
+    	
     }
     
-    public void onClickAudioStop(View view) {
+    public void onClickAudioStop(View view)
+    {
     	// Stop playback
-    	Log.d(TAG, "Stop Audio Touched" );
+    	Log.d(TAG, "Stop audio pressed" );
     	audioStop();
+    	
+    	//playButten.setEnabled(true);
+    	
     }
     
     Runnable m_audioGenerator = new Runnable()
@@ -171,11 +187,9 @@ public class MainActivity extends Activity {
     void audioStart()
     {
         m_stop = false;
-
         m_audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 22050, AudioFormat.CHANNEL_OUT_MONO,
                                         AudioFormat.ENCODING_PCM_16BIT, 22050 /* 1 second buffer */,
-                                        AudioTrack.MODE_STREAM);            
-
+                                        AudioTrack.MODE_STREAM);
         m_audioTrack.play();
         m_audioThread = new Thread(m_audioGenerator);
         m_audioThread.start();
@@ -188,22 +202,26 @@ public class MainActivity extends Activity {
     }   
     /*
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
         mTask = new RtlTask();
         mTask.execute();
     }
 
     @Override
-    protected void onPause() {
+    protected void onPause()
+    {
         super.onPause();
         mTask.stop();
         
     }
 	*/
+    
     // Draw Options Menu
     @Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+	public boolean onCreateOptionsMenu(Menu menu)
+    {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
@@ -211,7 +229,8 @@ public class MainActivity extends Activity {
     
     // When Settings Menu is selected
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
     	switch (item.getItemId()) {
             case R.id.action_settings:
                 // Settings Menu was selected
@@ -241,7 +260,8 @@ public class MainActivity extends Activity {
          spinner1.setSelection(freq);
      }
     
-    private void Notify(String notificationTitle, String notificationMessage, int notificationID) {
+    private void Notify(String notificationTitle, String notificationMessage, int notificationID) 
+    {
     	  NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
     	  Intent notificationIntent = new Intent(this, MainActivity.class);
     	  PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
@@ -252,12 +272,13 @@ public class MainActivity extends Activity {
           	.setContentText(notificationMessage)
           	.setSmallIcon(R.drawable.ic_launcher)
           	.setContentIntent(pendingIntent);
-    	  Notification notification = builder.build();
+    	  Notification notification = builder.build();  
     	  // Hide notification after its been selected
     	  notification.flags |= Notification.FLAG_AUTO_CANCEL;
     	  // Send notification
     	  notificationManager.notify(notificationID, notification);
-    	 }
+    	  
+    }
  
     class RtlTask extends AsyncTask<String, Void, Void> {
         PipedOutputStream mPOut;
@@ -312,8 +333,8 @@ public class MainActivity extends Activity {
             	Log.d(TAG, "Got data root: "+ dataRoot);
             	Log.d(TAG, "Frequency Selected: "+ params[0]);
             	Log.d(TAG, "Gain: "+ params[1]);
-            	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -N -f " + params[0] + "M -s 22.5k -g " + params[1] + " | tee " + dataRoot + "/pipe | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
-            	String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/multimon-ng" };
+            	String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -N -f " + params[0] + "M -s 22050 -g " + params[1] + " | tee " + dataRoot + "/pipe | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
+            	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/multimon-ng" };
                 mProcess = new ProcessBuilder()
                     .command(cmd)
                     .redirectErrorStream(true)

@@ -12,12 +12,13 @@ LOCAL_SRC_FILES:= \
  libusb-andro/libusb/os/linux_usbfs.c \
  libusb-andro/libusb/os/threads_posix.c\
  rtl-sdr/src/rtl_fm.c \
+ rtl-sdr/src/convenience/convenience.c \
  rtl-sdr/src/librtlsdr.c \
  rtl-sdr/src/tuner_e4k.c \
  rtl-sdr/src/tuner_fc0012.c \
  rtl-sdr/src/tuner_fc0013.c \
  rtl-sdr/src/tuner_fc2580.c \
- rtl-sdr/src/tuner_r820t.c
+ rtl-sdr/src/tuner_r82xx.c
 
 LOCAL_C_INCLUDES += \
 libusb-andro \
@@ -25,7 +26,8 @@ libusb-andro/libusb \
 libusb-andro/libusb/os \
 libusb-andro/libusb \
 rtl-sdr/include \
-rtl-sdr/src
+rtl-sdr/src \
+rtl-sdr/src/convenience
 
 LOCAL_CFLAGS += -DLIBUSB_DESCRIBE=""  -O3 
 LOCAL_MODULE:= rtl_fm
