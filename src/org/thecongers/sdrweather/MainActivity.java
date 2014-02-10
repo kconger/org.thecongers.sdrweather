@@ -60,7 +60,6 @@ public class MainActivity extends Activity {
     boolean m_stop = false;
     AudioTrack m_audioTrack;
     Thread m_audioThread;
-    
     Button startButten;
     ImageButton playButten;
 
@@ -73,8 +72,8 @@ public class MainActivity extends Activity {
         fipsdb = new FipsDatabase(this);
         clcdb = new ClcDatabase(this);
 
+        // Setup Buttons
         startButten=(Button)findViewById(R.id.button1);
-        
         playButten=(ImageButton)findViewById(R.id.imageButton1);
         playButten.setEnabled(false);
         

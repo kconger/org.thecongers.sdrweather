@@ -62,10 +62,18 @@
            android:textAppearance="?android:attr/textAppearanceSmall" />
 
        <TextView
+           android:id="@+id/textView10"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="@string/output_header"
+           android:textAppearance="?android:attr/textAppearanceLarge" />
+
+       <TextView
            android:id="@+id/TextView02"
            android:layout_width="match_parent"
            android:layout_height="0dip"
            android:layout_weight="0.43"
+           android:gravity="bottom"
            android:text="@string/output" />
 
         <LinearLayout

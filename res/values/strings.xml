@@ -10,7 +10,8 @@
     <string name="purgetime">Expires in:</string>
     <string name="issuetime">Issue Time:</string>
     <string name="callsign">Call Sign:</string>
-    <string name="output">Command Output:\n</string>
+    <string name="output_header">Command Output:</string>
+    <string name="output">\n</string>
     <string name="spinner_desc">Frequency</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
