@@ -40,12 +40,12 @@
     
     <string name="rtlsettings">rtl_fm Settings</string>
     <string name="pref_freq_name">Default Frequency</string>
-    <string name="pref_freq_summary">Set default frequency on launch.</string>
+    <string name="pref_freq_summary">Default frequency on launch.</string>
     <string name="pref_gain_name">Gain</string>
     <string name="pref_gain_summary">A floating point gain value. The dongle will use the closest gain setting available.</string>   
     <string name="uisettings">UI Settings</string>
     <string name="pref_country_name">Country</string>
-    <string name="pref_country_summary">Set Country, used for location code lookups.</string>
+    <string name="pref_country_summary">Country used for location code lookups.</string>
     <string-array name="country">
         <item name="1">United States</item>
         <item name="2">Canada</item>
@@ -54,5 +54,7 @@
         <item name="1">0</item>
         <item name="2">1</item>
     </string-array>
+    <string name="pref_start_audio_name">Audio</string>
+    <string name="pref_start_audio_summary">Play audio on start</string>
 
 </resources>

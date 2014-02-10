@@ -8,6 +8,12 @@
             android:entries="@array/country"
             android:entryValues="@array/countryValues"
             />
+    	<CheckBoxPreference
+            android:defaultValue="false"
+            android:key="prefStartAudio"
+            android:summary="@string/pref_start_audio_summary"
+            android:title="@string/pref_start_audio_name" >
+        </CheckBoxPreference>
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/rtlsettings" >
     	<ListPreference
@@ -20,7 +26,7 @@
     	<EditTextPreference
         	android:title="@string/pref_gain_name"
             android:summary="@string/pref_gain_summary"
-            android:defaultValue="50"
+            android:defaultValue="42"
             android:key="prefGain"
             />
     </PreferenceCategory>

@@ -62,6 +62,7 @@ public class MainActivity extends Activity {
     Thread m_audioThread;
     Button startButten;
     ImageButton playButten;
+    ImageButton stopButten;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -76,6 +77,8 @@ public class MainActivity extends Activity {
         startButten=(Button)findViewById(R.id.button1);
         playButten=(ImageButton)findViewById(R.id.imageButton1);
         playButten.setEnabled(false);
+        stopButten=(ImageButton)findViewById(R.id.imageButton2);
+        stopButten.setEnabled(false);
         
         //Set Initial Frequency From Preferences
         spinner1 = (Spinner) findViewById(R.id.spinner1);
@@ -122,13 +125,16 @@ public class MainActivity extends Activity {
     		
     		startButten.setEnabled(false);
     		playButten.setEnabled(true);
+    		if (sharedPrefs.getBoolean("prefStartAudio", false)) {
+            	playButten.performClick();
+            }
     	} else {
     		// Display message about lack of root
-    		if (RootTools.isRootAvailable()) {
+    		if (!RootTools.isRootAvailable()) {
     			Toast.makeText(MainActivity.this,
     					"Root Access Not Available!",
     					Toast.LENGTH_SHORT).show();
-    		} else if (RootTools.isBusyboxAvailable()) {
+    		} else if (!RootTools.isBusyboxAvailable()) {
     			RootTools.offerBusyBox(MainActivity.this);   			
     		}
     	}
@@ -136,8 +142,9 @@ public class MainActivity extends Activity {
     
     public void onClickStop(View view)
     {
-    	mTask.stop();
+    	stopButten.performClick();
     	
+    	mTask.stop();
     	startButten.setEnabled(true);
     	playButten.setEnabled(false);
     }
@@ -149,6 +156,7 @@ public class MainActivity extends Activity {
     	audioStart();
     	
     	playButten.setEnabled(false);
+    	stopButten.setEnabled(true);
     	
     }
     
@@ -159,6 +167,7 @@ public class MainActivity extends Activity {
     	audioStop();
     	
     	playButten.setEnabled(true);
+    	stopButten.setEnabled(false);
     	
     }
     
@@ -347,7 +356,7 @@ public class MainActivity extends Activity {
                     .command(cmd)
                     .redirectErrorStream(true)
                     .start();
-
+                
                 try {
                     InputStream in = mProcess.getInputStream();
                     OutputStream out = mProcess.getOutputStream();
@@ -363,6 +372,7 @@ public class MainActivity extends Activity {
                     in.close();
                     mPOut.close();
                     mPIn.close();
+                    
                 } finally {
                     mProcess.destroy();
                     mProcess = null;
