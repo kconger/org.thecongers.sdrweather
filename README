@@ -1,22 +1,29 @@
 SDRWeather
+Author: Keith Conger <keith.conger@gmail.com>
+http://sdrweather.thecongers.org
 
-Weather Alert Reader that uses rtl_fm to demodulate FM 
-from a support rtl_sdr device and multimon-ng to decode EAS
-Messages. This may only work in the United States and Canada.
+Weather Radio and EAS Alert Reader that uses rtl_fm to demodulate 
+FM from a supported rtl_sdr device and multimon-ng to decode EAS
+Messages. This will only work in the United States and Canada.
+
+Requires:
+* A supported rtl_sdr device
+* Device that supports USB OTG
+* root access
+* busybox installed
 
 Current Features:
-* Decode United States and Canadian Weather Alerts
+* Listen to the weather radio US/Canada.
+* Decode EAS Alerts US/Canada
 * Selectable Frequencies
-* Offline FIPS and CLC Location Code Database
+* Alert Notifications
+* Offline FIPS and CLC Location Code Databases
 * Offline Event Code Database
 
 Future:
-* Alert Notifications
+* Pretty up interface
 * Widget to display alerts
-* Listen to the weather radio audio.
-
-Author: Keith Conger <keith.conger@gmail.com>
-http://sdrweather.thecongers.org
+* Check to see if you are in currently affected region
 
 Software Used:
 rtl_tcp_andro
