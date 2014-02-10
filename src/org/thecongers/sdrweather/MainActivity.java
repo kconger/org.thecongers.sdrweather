@@ -26,7 +26,6 @@ import android.preference.PreferenceManager;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Notification;
-import android.app.Notification.Builder;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -62,7 +61,8 @@ public class MainActivity extends Activity {
     AudioTrack m_audioTrack;
     Thread m_audioThread;
     
-    //ImageButton playButten;
+    Button startButten;
+    ImageButton playButten;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -73,7 +73,10 @@ public class MainActivity extends Activity {
         fipsdb = new FipsDatabase(this);
         clcdb = new ClcDatabase(this);
 
-        //playButten=(ImageButton)findViewById(R.id.imageButton1);
+        startButten=(Button)findViewById(R.id.button1);
+        
+        playButten=(ImageButton)findViewById(R.id.imageButton1);
+        playButten.setEnabled(false);
         
         //Set Initial Frequency From Preferences
         spinner1 = (Spinner) findViewById(R.id.spinner1);
@@ -117,6 +120,9 @@ public class MainActivity extends Activity {
     		// Call for process to start
     		mTask = new RtlTask();
     		mTask.execute(freq,gain);
+    		
+    		startButten.setEnabled(false);
+    		playButten.setEnabled(true);
     	} else {
     		// Display message about lack of root
     		if (RootTools.isRootAvailable()) {
@@ -132,6 +138,9 @@ public class MainActivity extends Activity {
     public void onClickStop(View view)
     {
     	mTask.stop();
+    	
+    	startButten.setEnabled(true);
+    	playButten.setEnabled(false);
     }
     
     public void onClickAudioStart(View view)
@@ -140,7 +149,7 @@ public class MainActivity extends Activity {
     	Log.d(TAG, "Start audio pressed" );
     	audioStart();
     	
-    	//playButten.setEnabled(false);
+    	playButten.setEnabled(false);
     	
     }
     
@@ -150,7 +159,7 @@ public class MainActivity extends Activity {
     	Log.d(TAG, "Stop audio pressed" );
     	audioStop();
     	
-    	//playButten.setEnabled(true);
+    	playButten.setEnabled(true);
     	
     }
     
