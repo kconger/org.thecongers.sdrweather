@@ -41,6 +41,7 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.text.method.ScrollingMovementMethod;
 
 import com.stericson.RootTools.*;
 
@@ -63,6 +64,7 @@ public class MainActivity extends Activity {
     Button startButten;
     ImageButton playButten;
     ImageButton stopButten;
+    TextView mText;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -79,6 +81,9 @@ public class MainActivity extends Activity {
         playButten.setEnabled(false);
         stopButten=(ImageButton)findViewById(R.id.imageButton2);
         stopButten.setEnabled(false);
+        
+        mText = (TextView) findViewById(R.id.TextView02);
+        mText.setMovementMethod(new ScrollingMovementMethod());
         
         //Set Initial Frequency From Preferences
         spinner1 = (Spinner) findViewById(R.id.spinner1);
@@ -177,7 +182,7 @@ public class MainActivity extends Activity {
             
             FileInputStream audioStream = null;
             try {
-            	Log.d(TAG, "Setting nedia file to: " + dataRoot + "/pipe" );
+            	Log.d(TAG, "Setting audio stream to: " + dataRoot + "/pipe" );
                 audioStream = new FileInputStream(dataRoot + "/pipe");
             } catch (FileNotFoundException e) {
             	e.printStackTrace();
@@ -215,24 +220,7 @@ public class MainActivity extends Activity {
         m_stop = true;          
         m_audioTrack.stop();
     }   
-    /*
-    @Override
-    protected void onResume()
-    {
-        super.onResume();
-        mTask = new RtlTask();
-        mTask.execute();
-    }
 
-    @Override
-    protected void onPause()
-    {
-        super.onPause();
-        mTask.stop();
-        
-    }
-	*/
-    
     // Draw Options Menu
     @Override
 	public boolean onCreateOptionsMenu(Menu menu)
@@ -308,8 +296,7 @@ public class MainActivity extends Activity {
         TextView purgeTimeText = (TextView) findViewById(R.id.textView4);
         TextView issueTimeText = (TextView) findViewById(R.id.textView5);
         TextView callsignText = (TextView) findViewById(R.id.textView6);
-        TextView mText = (TextView) findViewById(R.id.TextView02);
-        
+
         @Override
         protected void onPreExecute() {
             mPOut = new PipedOutputStream();

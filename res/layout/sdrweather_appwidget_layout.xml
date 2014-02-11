@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/full_widget"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+    <ImageView
+        android:id="@+id/logo"
+        android:contentDescription="@string/app_icon_desc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/app_icon"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        android:layout_alignParentLeft="true"
+        android:layout_toRightOf="@id/logo"
+        android:layout_centerHorizontal="true"
+        android:maxWidth="100dp"
+        android:minHeight="100dp" />
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/logo"
+        android:textStyle="bold"
+        android:text="@string/appwidget_label"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:padding="3dp" />
+    <TextView
+        android:id="@+id/alert"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/logo"
+        android:layout_below="@id/label"
+        android:textSize="14sp"
+        android:padding="3dp"
+        android:textColor="@android:color/black"
+        android:textStyle="italic" />
+</RelativeLayout>

@@ -60,7 +60,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -76,7 +76,10 @@
        height="96.059113"
        x="0"
        y="-0.059113301"
-       transform="translate(0,956.36218)" />
+       transform="translate(0,956.36218)"
+       inkscape:export-filename="/Users/keithconger/Projects/Android/org.thecongers.sdrweather/res/drawable-ldpi/app_icon.png"
+       inkscape:export-xdpi="32.480427"
+       inkscape:export-ydpi="32.480427" />
     <path
        sodipodi:type="arc"
        style="fill:#ffe900;fill-opacity:1;fill-rule:evenodd;stroke:#f4c900;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
