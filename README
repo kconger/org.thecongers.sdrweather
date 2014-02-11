@@ -25,6 +25,10 @@ Future:
 * Widget to display alerts
 * Check to see if you are in currently affected region
 
+To build:
+1) Run ndk-build inside the jni folder
+2) Then build the project in Eclipse 
+
 Software Used:
 libusb mods and Android.mk from rtl_tcp_andro
 https://github.com/martinmarinov/rtl_tcp_andro-

@@ -34,6 +34,11 @@ LOCAL_MODULE:= rtl_fm
 LOCAL_PRELINK_MODULE:= true
 include $(BUILD_EXECUTABLE)
 
+all: $(LOCAL_PATH)/../assets/nativeFolder/$(notdir $(LOCAL_BUILT_MODULE))
+
+$(LOCAL_PATH)/../assets/nativeFolder/$(notdir $(LOCAL_BUILT_MODULE)): $(LOCAL_BUILT_MODULE)
+	cp $< $@
+
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
@@ -76,3 +81,8 @@ LOCAL_CFLAGS += -O3 -DMAX_VERBOSE_LEVEL=1 -DDUMMY_AUDIO -DNO_X11 -DCHARSET_UTF8 
 LOCAL_MODULE:= multimon-ng
 LOCAL_PRELINK_MODULE:= true
 include $(BUILD_EXECUTABLE)
+
+all: $(LOCAL_PATH)/../assets/nativeFolder/$(notdir $(LOCAL_BUILT_MODULE))
+
+$(LOCAL_PATH)/../assets/nativeFolder/$(notdir $(LOCAL_BUILT_MODULE)): $(LOCAL_BUILT_MODULE)
+	cp $< $@
