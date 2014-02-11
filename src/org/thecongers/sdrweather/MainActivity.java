@@ -156,8 +156,7 @@ public class MainActivity extends Activity {
     	audioStart();
     	
     	playButten.setEnabled(false);
-    	stopButten.setEnabled(true);
-    	
+    	stopButten.setEnabled(true);	
     }
     
     public void onClickAudioStop(View view)
@@ -167,8 +166,7 @@ public class MainActivity extends Activity {
     	audioStop();
     	
     	playButten.setEnabled(true);
-    	stopButten.setEnabled(false);
-    	
+    	stopButten.setEnabled(false);	
     }
     
     Runnable m_audioGenerator = new Runnable()
@@ -287,7 +285,7 @@ public class MainActivity extends Activity {
     	  Notification.Builder builder = new Notification.Builder(this);
     	  builder.setContentTitle(notificationTitle)
           	.setContentText(notificationMessage)
-          	.setSmallIcon(R.drawable.ic_launcher)
+          	.setSmallIcon(R.drawable.app_icon)
           	.setContentIntent(pendingIntent);
     	  Notification notification = builder.build();  
     	  // Hide notification after its been selected
@@ -479,7 +477,7 @@ public class MainActivity extends Activity {
         							fips = fipsdb.getCountyState(fipscode);
         							if( fips != null && fips.moveToFirst() ){
         								Log.d(TAG, "Location: " + fips.getString(fips.getColumnIndex("county")) + ", " + fips.getString(fips.getColumnIndex("state")));
-        								regionsText.append(fips.getString(fips.getColumnIndex("county")) + ", " + fips.getString(fips.getColumnIndex("state")) + "\n");
+        								regionsText.append(fips.getString(fips.getColumnIndex("county")) + ", " + fips.getString(fips.getColumnIndex("state")) + "; ");
         							}
         							//fips.close();
         							j++;
@@ -495,7 +493,7 @@ public class MainActivity extends Activity {
         							clc = clcdb.getCountyState(clccode);
         							if( clc != null && clc.moveToFirst() ){
         								Log.d(TAG, "Location: " + clc.getString(clc.getColumnIndex("region")) + ", " + clc.getString(clc.getColumnIndex("provinceterritory")));
-        								regionsText.append(clc.getString(clc.getColumnIndex("region")) + ", " + clc.getString(clc.getColumnIndex("provinceterritory")) + "\n");
+        								regionsText.append(clc.getString(clc.getColumnIndex("region")) + ", " + clc.getString(clc.getColumnIndex("provinceterritory")) + "; ");
         							}
         							//clc.close();
         							j++;

@@ -7,13 +7,13 @@ FM from a supported rtl_sdr device and multimon-ng to decode EAS
 Messages. This will only work in the United States and Canada.
 
 Requires:
-* A supported rtl_sdr device
-* Device that supports USB OTG
+* A supported rtl_sdr device, see (http://sdr.osmocom.org/trac/wiki/rtl-sdr)
+* Android device that supports USB OTG
 * root access
 * busybox installed
 
 Current Features:
-* Listen to the weather radio US/Canada.
+* Listen to weather radio in the US/Canada.
 * Decode EAS Alerts US/Canada
 * Selectable Frequencies
 * Alert Notifications
@@ -26,7 +26,7 @@ Future:
 * Check to see if you are in currently affected region
 
 Software Used:
-rtl_tcp_andro
+libusb mods and Android.mk from rtl_tcp_andro
 https://github.com/martinmarinov/rtl_tcp_andro-
 
 libusb
