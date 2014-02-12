@@ -131,32 +131,16 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="bottom" >
+        android:gravity="bottom"
+        android:orientation="vertical" >
 
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="0dip"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1"
-            android:text="@string/audio"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
-
-        <ImageButton
-            android:id="@+id/imageButton1"
+        <Switch
+            android:id="@+id/switch1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:contentDescription="@string/play_button"
-            android:onClick="onClickAudioStart"
-            android:src="@android:drawable/ic_media_play" />
+            android:layout_gravity="right"
+            android:text="@string/audio" />
 
-        <ImageButton
-            android:id="@+id/imageButton2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="@string/stop_button"
-            android:onClick="onClickAudioStop"
-            android:src="@android:drawable/ic_media_pause" />
     </LinearLayout>
 
 </LinearLayout>

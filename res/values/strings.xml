@@ -13,11 +13,9 @@
     <string name="output_header">Command Output:</string>
     <string name="output">\n</string>
     <string name="spinner_desc">Frequency</string>
-    <string name="start">Start</string>
-    <string name="stop">Stop</string>
+    <string name="start">Start Monitoring</string>
+    <string name="stop">Stop Monitoring</string>
     <string name="audio">Audio</string>
-    <string name="play_button">Play Audio</string>
-    <string name="stop_button">Stop Audio</string>
 
     <string-array name="frequency_array">
         <item name="1">162.400</item>

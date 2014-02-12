@@ -32,19 +32,14 @@ public class sdrWidgetProvider extends AppWidgetProvider {
 	      RemoteViews remoteView = new RemoteViews(context.getPackageName(),      
 	            R.layout.sdrweather_appwidget_layout);
 	      
-	      Log.d(DEBUG_TAG, "About to query for event");
 	      Cursor easmsg = easdb.getActiveEvent();
-	      
 	      if( easmsg != null && easmsg.moveToFirst() ){
-	    	  Log.d(DEBUG_TAG, "Trying to display an event!");
 	    	  String eventlevel = easmsg.getString(easmsg.getColumnIndex("level"));
 	    	  String eventdesc = easmsg.getString(easmsg.getColumnIndex("desc"));
 	    	  remoteView.setTextViewText(R.id.alert, eventlevel + ": " + eventdesc);
 	      } else {
 	    	  remoteView.setTextViewText(R.id.alert, "No Active Events");
 	      }
-	      
-	      Log.d(DEBUG_TAG, "Widget Updated!");
 	 
 	      Intent launchAppIntent = new Intent(context, MainActivity.class);
 	      PendingIntent launchAppPendingIntent = PendingIntent.getActivity(context, 

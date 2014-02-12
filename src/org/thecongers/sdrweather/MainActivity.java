@@ -38,8 +38,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.text.method.ScrollingMovementMethod;
@@ -64,8 +66,7 @@ public class MainActivity extends Activity {
     AudioTrack m_audioTrack;
     Thread m_audioThread;
     Button startButten;
-    ImageButton playButten;
-    ImageButton stopButten;
+    Switch switch1;
     TextView mText;
     TextView evLvlText;
     TextView evDescText;
@@ -84,17 +85,33 @@ public class MainActivity extends Activity {
         fipsdb = new FipsDatabase(this);
         clcdb = new ClcDatabase(this);
         easdb = new EasDatabase(this);
+        sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         
         //Purge old events
         easdb.purgeExpiredMsg();
-
-        // Setup Buttons
-        startButten=(Button)findViewById(R.id.button1);
-        playButten=(ImageButton)findViewById(R.id.imageButton1);
-        playButten.setEnabled(false);
-        stopButten=(ImageButton)findViewById(R.id.imageButton2);
-        stopButten.setEnabled(false);
         
+        switch1 = (Switch) findViewById(R.id.switch1);
+        switch1.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+        	@Override
+        	public void onCheckedChanged(CompoundButton buttonView,
+        	boolean isChecked) {
+        		Log.d(TAG, "in onChecked" );
+        		if ( m_audioTrack != null ) {
+        			if (isChecked) {
+        				Log.d(TAG, "is Checked" );
+        				m_audioTrack.setStereoVolume(1.0f, 1.0f);
+        			} else {
+        				Log.d(TAG, "is not Checked" );
+        				m_audioTrack.setStereoVolume(0.0f, 0.0f);
+        			}
+        		}
+        		}
+        	});
+        if (sharedPrefs.getBoolean("prefStartAudio", true)) {
+        	switch1.setChecked(true);
+        } else {
+        	switch1.setChecked(false);
+        }
         mText = (TextView) findViewById(R.id.TextView02);
         mText.setMovementMethod(new ScrollingMovementMethod());
         evLvlText = (TextView) findViewById(R.id.textView7);
@@ -107,7 +124,6 @@ public class MainActivity extends Activity {
         
         //Set Initial Frequency From Preferences
         spinner1 = (Spinner) findViewById(R.id.spinner1);
-        sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         int freq = Integer.parseInt(sharedPrefs.getString("prefDefaultFreq", "6"));
         Log.d(TAG, "Freq set to: " + freq );
         spinner1.setSelection(freq);
@@ -144,8 +160,8 @@ public class MainActivity extends Activity {
     	File nativeDirectory = new File(binDir);
     	nativeDirectory.mkdirs();
     	// Copy binaries
-    	copyFile("nativeFolder/test",dataRoot + "/nativeFolder/multimon-ng",getBaseContext());
-    	//copyFile("nativeFolder/multimon-ng",dataRoot + "/nativeFolder/multimon-ng",getBaseContext());
+    	//copyFile("nativeFolder/test",dataRoot + "/nativeFolder/multimon-ng",getBaseContext());
+    	copyFile("nativeFolder/multimon-ng",dataRoot + "/nativeFolder/multimon-ng",getBaseContext());
     	copyFile("nativeFolder/rtl_fm",dataRoot + "/nativeFolder/rtl_fm",getBaseContext());
     	// Set execute permissions
         StringBuilder command = new StringBuilder("chmod 700 ");
@@ -210,6 +226,8 @@ public class MainActivity extends Activity {
 
     public void onClickStart(View view)
     {
+    	// Start Pressed
+    	Log.d(TAG, "Start Pressed" );
     	if (RootTools.isRootAvailable() && RootTools.isBusyboxAvailable()) {
     		// Get Frequency and gain
     		String freq = String.valueOf(spinner1.getSelectedItem());
@@ -217,12 +235,14 @@ public class MainActivity extends Activity {
     		// Call for process to start
     		mTask = new RtlTask();
     		mTask.execute(freq,gain);
+    		audioStart();
+    		if (switch1.isChecked()) {
+    			m_audioTrack.setStereoVolume(1.0f, 1.0f);
+    		} else {
+    			m_audioTrack.setStereoVolume(0.0f, 0.0f);
+    		}
     		
-    		startButten.setEnabled(false);
-    		playButten.setEnabled(true);
-    		if (sharedPrefs.getBoolean("prefStartAudio", false)) {
-            	playButten.performClick();
-            }
+    		//audioStart();
     	} else {
     		// Display message about lack of root
     		if (!RootTools.isRootAvailable()) {
@@ -237,31 +257,11 @@ public class MainActivity extends Activity {
     
     public void onClickStop(View view)
     {
-    	stopButten.performClick();
-    	
-    	mTask.stop();
-    	startButten.setEnabled(true);
-    	playButten.setEnabled(false);
-    }
-    
-    public void onClickAudioStart(View view)
-    {
-    	// Start playback
-    	Log.d(TAG, "Start audio pressed" );
-    	audioStart();
-    	
-    	playButten.setEnabled(false);
-    	stopButten.setEnabled(true);	
-    }
-    
-    public void onClickAudioStop(View view)
-    {
-    	// Stop playback
-    	Log.d(TAG, "Stop audio pressed" );
+    	// Stop Pressed
+    	Log.d(TAG, "Stop Pressed" );
     	audioStop();
-    	
-    	playButten.setEnabled(true);
-    	stopButten.setEnabled(false);	
+    	mTask.stop();
+
     }
     
     Runnable m_audioGenerator = new Runnable()
@@ -307,7 +307,7 @@ public class MainActivity extends Activity {
 
     void audioStop()
     {
-        m_stop = true;          
+        m_stop = true;
         m_audioTrack.stop();
     }   
 
@@ -351,6 +351,11 @@ public class MainActivity extends Activity {
     	 int freq = Integer.parseInt(sharedPrefs.getString("prefDefaultFreq", "6"));
          Log.d(TAG, "Updating freqency spinner to index: " + freq );
          spinner1.setSelection(freq);
+         if (sharedPrefs.getBoolean("prefStartAudio", true)) {
+         	switch1.setChecked(true);
+         } else {
+         	switch1.setChecked(false);
+         }
      }
     
     private void Notify(String notificationTitle, String notificationMessage, int notificationID) 
@@ -417,8 +422,8 @@ public class MainActivity extends Activity {
             	Log.d(TAG, "Got data root: "+ dataRoot);
             	Log.d(TAG, "Frequency Selected: "+ params[0]);
             	Log.d(TAG, "Gain: "+ params[1]);
-            	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -f " + params[0] + "M -s 22050 -g " + params[1] + " | tee " + dataRoot + "/pipe | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
-            	String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/multimon-ng" };
+            	String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -f " + params[0] + "M -s 22050 -g " + params[1] + " | tee " + dataRoot + "/pipe | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
+            	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/multimon-ng" };
                 mProcess = new ProcessBuilder()
                     .command(cmd)
                     .redirectErrorStream(true)

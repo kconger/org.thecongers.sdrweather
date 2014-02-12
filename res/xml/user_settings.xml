@@ -9,7 +9,7 @@
             android:entryValues="@array/countryValues"
             />
     	<CheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="prefStartAudio"
             android:summary="@string/pref_start_audio_summary"
             android:title="@string/pref_start_audio_name" >
