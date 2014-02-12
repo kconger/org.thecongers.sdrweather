@@ -13,6 +13,7 @@ public class ClcDatabase extends SQLiteAssetHelper {
 
     public ClcDatabase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        setForcedUpgrade();
     }
     
     public Cursor getCountyState(String clccode) {
@@ -28,6 +29,8 @@ public class ClcDatabase extends SQLiteAssetHelper {
         if (c != null)
             c.moveToFirst();
         
+     	// Closing database connection
+        db.close();
         return c;
         
     }

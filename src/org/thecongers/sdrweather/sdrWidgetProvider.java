@@ -6,11 +6,12 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.util.Log;
 import android.widget.RemoteViews;
 
 public class sdrWidgetProvider extends AppWidgetProvider {
-	public static final String DEBUG_TAG = "TutWidgetProvider";
+	public static final String DEBUG_TAG = "sdrWidgetProvider";
 	 
 	   @Override
 	   public void onUpdate(Context context, AppWidgetManager appWidgetManager,
@@ -26,13 +27,29 @@ public class sdrWidgetProvider extends AppWidgetProvider {
 	   public static void updateWidgetContent(Context context,
 	      AppWidgetManager appWidgetManager) {
 	       
+		  EasDatabase easdb = new EasDatabase(context);
+		  
 	      RemoteViews remoteView = new RemoteViews(context.getPackageName(),      
 	            R.layout.sdrweather_appwidget_layout);
-	      remoteView.setTextViewText(R.id.alert, "TEST");
+	      
+	      Log.d(DEBUG_TAG, "About to query for event");
+	      Cursor easmsg = easdb.getActiveEvent();
+	      
+	      if( easmsg != null && easmsg.moveToFirst() ){
+	    	  Log.d(DEBUG_TAG, "Trying to display an event!");
+	    	  String eventlevel = easmsg.getString(easmsg.getColumnIndex("level"));
+	    	  String eventdesc = easmsg.getString(easmsg.getColumnIndex("desc"));
+	    	  remoteView.setTextViewText(R.id.alert, eventlevel + ": " + eventdesc);
+	      } else {
+	    	  remoteView.setTextViewText(R.id.alert, "No Active Events");
+	      }
+	      
+	      Log.d(DEBUG_TAG, "Widget Updated!");
 	 
 	      Intent launchAppIntent = new Intent(context, MainActivity.class);
 	      PendingIntent launchAppPendingIntent = PendingIntent.getActivity(context, 
 	            0, launchAppIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+	      
 	      remoteView.setOnClickPendingIntent(R.id.full_widget, launchAppPendingIntent);
 	 
 	      ComponentName tutListWidget = new ComponentName(context, 

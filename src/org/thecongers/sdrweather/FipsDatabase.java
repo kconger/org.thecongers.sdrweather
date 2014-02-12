@@ -13,6 +13,7 @@ public class FipsDatabase extends SQLiteAssetHelper {
 
     public FipsDatabase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        setForcedUpgrade();
     }
     
     public Cursor getCountyState(String fipscode) {
@@ -28,6 +29,8 @@ public class FipsDatabase extends SQLiteAssetHelper {
         if (c != null)
             c.moveToFirst();
         
+        // Closing database connection
+        db.close();
         return c;
         
     }

@@ -14,6 +14,7 @@ public class EventDatabase extends SQLiteAssetHelper {
 
     public EventDatabase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        setForcedUpgrade();
     }
     
     public Cursor getEventInfo(String evcode) {
@@ -29,6 +30,8 @@ public class EventDatabase extends SQLiteAssetHelper {
         if (c != null)
             c.moveToFirst();
 
+        // Closing database connection
+        db.close();
         return c;
         
     }

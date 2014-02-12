@@ -28,6 +28,7 @@ import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -54,6 +55,7 @@ public class MainActivity extends Activity {
     private EventDatabase eventdb;
     private FipsDatabase fipsdb;
     private ClcDatabase clcdb;
+    EasDatabase easdb;
     private Spinner spinner1;
     private SharedPreferences sharedPrefs;
     private static final int SETTINGS_RESULT = 1;
@@ -65,6 +67,13 @@ public class MainActivity extends Activity {
     ImageButton playButten;
     ImageButton stopButten;
     TextView mText;
+    TextView evLvlText;
+    TextView evDescText;
+    TextView regionsText;
+    TextView orgText;
+    TextView purgeTimeText;
+    TextView issueTimeText;
+    TextView callsignText;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -74,6 +83,10 @@ public class MainActivity extends Activity {
         eventdb = new EventDatabase(this);
         fipsdb = new FipsDatabase(this);
         clcdb = new ClcDatabase(this);
+        easdb = new EasDatabase(this);
+        
+        //Purge old events
+        easdb.purgeExpiredMsg();
 
         // Setup Buttons
         startButten=(Button)findViewById(R.id.button1);
@@ -84,6 +97,13 @@ public class MainActivity extends Activity {
         
         mText = (TextView) findViewById(R.id.TextView02);
         mText.setMovementMethod(new ScrollingMovementMethod());
+        evLvlText = (TextView) findViewById(R.id.textView7);
+        evDescText = (TextView) findViewById(R.id.textView8);
+        regionsText = (TextView) findViewById(R.id.textView9);
+        orgText = (TextView) findViewById(R.id.textView1);
+        purgeTimeText = (TextView) findViewById(R.id.textView4);
+        issueTimeText = (TextView) findViewById(R.id.textView5);
+        callsignText = (TextView) findViewById(R.id.textView6);
         
         //Set Initial Frequency From Preferences
         spinner1 = (Spinner) findViewById(R.id.spinner1);
@@ -92,6 +112,31 @@ public class MainActivity extends Activity {
         Log.d(TAG, "Freq set to: " + freq );
         spinner1.setSelection(freq);
         
+        // Show last currently active event if available
+        Cursor easmsg = easdb.getActiveEvent();  
+	    if( easmsg != null && easmsg.moveToFirst() ){
+	    	Log.d(TAG, "Trying to display an event!");
+	    	String level = easmsg.getString(easmsg.getColumnIndex("level"));
+	    	evLvlText.setText(level);
+	    	if("Test".equals(level)){
+				evLvlText.setBackgroundResource(R.color.white);
+			}else if("Warning".equals(level)){
+				evLvlText.setBackgroundResource(R.color.red);
+			}else if("Watch".equals(level)){
+				evLvlText.setBackgroundResource(R.color.yellow);
+			}else if("Advisory".equals(level)){
+				evLvlText.setBackgroundResource(R.color.green);
+			}
+	    	evDescText.setText(easmsg.getString(easmsg.getColumnIndex("desc")));
+	    	regionsText.setText("Regions Affected: " + easmsg.getString(easmsg.getColumnIndex("regions")));
+	    	orgText.setText("Originator Code: " + easmsg.getString(easmsg.getColumnIndex("org")));
+	    	purgeTimeText.setText("Expires at: " + easmsg.getString(easmsg.getColumnIndex("purgetime")));
+	    	issueTimeText.setText("Issue Time: " + easmsg.getString(easmsg.getColumnIndex("timeissued")));
+	    	callsignText.setText("Call Sign: " + easmsg.getString(easmsg.getColumnIndex("callsign")));
+	    } else {
+	    	Log.d(TAG, "No event");
+	    }
+        
         // Get data root
         dataRoot = getApplicationContext().getFilesDir().getParentFile().getPath();
         String binDir = dataRoot + "/nativeFolder/";
@@ -99,8 +144,8 @@ public class MainActivity extends Activity {
     	File nativeDirectory = new File(binDir);
     	nativeDirectory.mkdirs();
     	// Copy binaries
-    	//copyFile("nativeFolder/test",dataRoot + "/nativeFolder/multimon-ng",getBaseContext());
-    	copyFile("nativeFolder/multimon-ng",dataRoot + "/nativeFolder/multimon-ng",getBaseContext());
+    	copyFile("nativeFolder/test",dataRoot + "/nativeFolder/multimon-ng",getBaseContext());
+    	//copyFile("nativeFolder/multimon-ng",dataRoot + "/nativeFolder/multimon-ng",getBaseContext());
     	copyFile("nativeFolder/rtl_fm",dataRoot + "/nativeFolder/rtl_fm",getBaseContext());
     	// Set execute permissions
         StringBuilder command = new StringBuilder("chmod 700 ");
@@ -116,7 +161,52 @@ public class MainActivity extends Activity {
 			Runtime.getRuntime().exec(command3.toString());
 		} catch (IOException e) {
 		}
+        
     }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        easdb = new EasDatabase(this);
+        evLvlText = (TextView) findViewById(R.id.textView7);
+        evDescText = (TextView) findViewById(R.id.textView8);
+        regionsText = (TextView) findViewById(R.id.textView9);
+        orgText = (TextView) findViewById(R.id.textView1);
+        purgeTimeText = (TextView) findViewById(R.id.textView4);
+        issueTimeText = (TextView) findViewById(R.id.textView5);
+        callsignText = (TextView) findViewById(R.id.textView6);
+        // Show last currently active event if available
+        Cursor easmsg = easdb.getActiveEvent();  
+	    if( easmsg != null && easmsg.moveToFirst() ){
+	    	Log.d(TAG, "(onResume)Trying to display an event!");
+	    	String level = easmsg.getString(easmsg.getColumnIndex("level"));
+	    	evLvlText.setText(level);
+	    	if("Test".equals(level)){
+				evLvlText.setBackgroundResource(R.color.white);
+			}else if("Warning".equals(level)){
+				evLvlText.setBackgroundResource(R.color.red);
+			}else if("Watch".equals(level)){
+				evLvlText.setBackgroundResource(R.color.yellow);
+			}else if("Advisory".equals(level)){
+				evLvlText.setBackgroundResource(R.color.green);
+			}
+	    	evDescText.setText(easmsg.getString(easmsg.getColumnIndex("desc")));
+	    	regionsText.setText("Regions Affected: " + easmsg.getString(easmsg.getColumnIndex("regions")));
+	    	orgText.setText("Originator Code: " + easmsg.getString(easmsg.getColumnIndex("org")));
+	    	purgeTimeText.setText("Expires at: " + easmsg.getString(easmsg.getColumnIndex("purgetime")));
+	    	issueTimeText.setText("Issue Time: " + easmsg.getString(easmsg.getColumnIndex("timeissued")));
+	    	callsignText.setText("Call Sign: " + easmsg.getString(easmsg.getColumnIndex("callsign")));
+	    }
+    }
+
+    /*
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mTask.stop();
+        
+    }
+    */
 
     public void onClickStart(View view)
     {
@@ -289,14 +379,6 @@ public class MainActivity extends Activity {
         LineNumberReader mReader;
         Process mProcess;
 
-        TextView evLvlText = (TextView) findViewById(R.id.textView7);
-        TextView evDescText = (TextView) findViewById(R.id.textView8);
-        TextView regionsText = (TextView) findViewById(R.id.textView9);
-        TextView orgText = (TextView) findViewById(R.id.textView1);
-        TextView purgeTimeText = (TextView) findViewById(R.id.textView4);
-        TextView issueTimeText = (TextView) findViewById(R.id.textView5);
-        TextView callsignText = (TextView) findViewById(R.id.textView6);
-
         @Override
         protected void onPreExecute() {
             mPOut = new PipedOutputStream();
@@ -335,8 +417,8 @@ public class MainActivity extends Activity {
             	Log.d(TAG, "Got data root: "+ dataRoot);
             	Log.d(TAG, "Frequency Selected: "+ params[0]);
             	Log.d(TAG, "Gain: "+ params[1]);
-            	String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -f " + params[0] + "M -s 22050 -g " + params[1] + " | tee " + dataRoot + "/pipe | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
-            	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/multimon-ng" };
+            	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -f " + params[0] + "M -s 22050 -g " + params[1] + " | tee " + dataRoot + "/pipe | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
+            	String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/multimon-ng" };
                 mProcess = new ProcessBuilder()
                     .command(cmd)
                     .redirectErrorStream(true)
@@ -407,6 +489,7 @@ public class MainActivity extends Activity {
         					org = easMsg[1];
         					Log.d(TAG, "Originator Code: " + org);
         					orgText.setText("Originator Code: " + org);
+        					
         					/*
         					 * EEE Ñ Event code; programmed at time of event
         					 */
@@ -453,6 +536,7 @@ public class MainActivity extends Activity {
         					//Get Country From Preferences
         					int country = Integer.parseInt(sharedPrefs.getString("prefDefaultCountry", "0"));
         					Log.d(TAG, "Country Code: " + country);
+        					StringBuilder regions = new StringBuilder("");
         					if( country == 0 ){
         						for (int i=3; i < size - 2; i++) {
         							locationCodes[j] = easMsg[i];
@@ -465,8 +549,8 @@ public class MainActivity extends Activity {
         							if( fips != null && fips.moveToFirst() ){
         								Log.d(TAG, "Location: " + fips.getString(fips.getColumnIndex("county")) + ", " + fips.getString(fips.getColumnIndex("state")));
         								regionsText.append(fips.getString(fips.getColumnIndex("county")) + ", " + fips.getString(fips.getColumnIndex("state")) + "; ");
+        								regions.append(fips.getString(fips.getColumnIndex("county")) + "+" + fips.getString(fips.getColumnIndex("state")) + ":");
         							}
-        							//fips.close();
         							j++;
         						}
         					}else if( country == 1 ){
@@ -481,8 +565,8 @@ public class MainActivity extends Activity {
         							if( clc != null && clc.moveToFirst() ){
         								Log.d(TAG, "Location: " + clc.getString(clc.getColumnIndex("region")) + ", " + clc.getString(clc.getColumnIndex("provinceterritory")));
         								regionsText.append(clc.getString(clc.getColumnIndex("region")) + ", " + clc.getString(clc.getColumnIndex("provinceterritory")) + "; ");
+        								regions.append(clc.getString(clc.getColumnIndex("region")) + "+" + clc.getString(clc.getColumnIndex("provinceterritory")) + ":");
         							}
-        							//clc.close();
         							j++;
         						}
         					}
@@ -496,7 +580,6 @@ public class MainActivity extends Activity {
         					Log.d(TAG, "Purge time: " + purgeTime);
         					String purgeTimeHour = purgeTime.substring(0,2);
         					String purgeTimeMin = purgeTime.substring(2,4);
-        					purgeTimeText.setText("Expires in:" + purgeTimeHour + "h" + purgeTimeMin + "m");
         				
         					/*
         					 * JJJHHMM Ñ Exact time of issue, in UTC, (without time zone adjustments).
@@ -525,6 +608,34 @@ public class MainActivity extends Activity {
         					localTimeOfIssue = defaultFormat.format(date);
         					Log.d(TAG, "Time of issue (Local): " + localTimeOfIssue);
         					issueTimeText.setText("Time of issue: " + localTimeOfIssue);
+        					
+        					// Get Current Date/Time
+        					Calendar cal = Calendar.getInstance();
+        					Date date2 = cal.getTime();
+
+        					SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        					formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        					String curdate = formatter.format(date2);
+        					Log.d(TAG, "Message Received at (UTC): " + curdate);
+        					
+        					// Calculate EAS MSG Expiration Date/Time
+        					cal.clear();
+        					cal.setTime(date);
+        					Date idate = cal.getTime();
+        					formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        					String issuedate = formatter.format(idate);
+        					Log.d(TAG, "Time of issue (UTC): " + issuedate);
+        					
+        					int exphours = Integer.parseInt(purgeTimeHour);
+        					int expmins = Integer.parseInt(purgeTimeMin);
+        					cal.add(Calendar.HOUR_OF_DAY, exphours);
+        					cal.add(Calendar.MINUTE, expmins);
+        					Date edate = cal.getTime();
+        					formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        					String expdate = formatter.format(edate);
+        					Log.d(TAG, "MSG Expires (UTC): " + expdate);
+        					// TODO covert to local time
+        					purgeTimeText.setText("Expires at:" + expdate);
         				
         					/*
         					 * LLLLLLLL Ñ Eight-character station callsign identification, with "/" used instead of "Ð" (such as the first eight
@@ -538,9 +649,15 @@ public class MainActivity extends Activity {
         					// Send a notification
         					Notify("EAS " + eventlevel + " from " + callSign,
         							eventdesc + " was issued", notificationID);
+        					
+        					//Update EAS MSG database
+        					easdb.addEasMsg (new EasMsg(org, eventdesc, eventlevel, curdate, issuedate, callSign, expdate, regions.toString(), sharedPrefs.getString("prefDefaultCountry", "0")));
+        					
+        					//Update Widget
+        					sdrWidgetProvider.updateWidgetContent(getBaseContext(), 
+        					    AppWidgetManager.getInstance(getBaseContext()));
         				
         					}
-
         		    } else if (currentLine.contains("No supported devices found")) {
         		    	Toast.makeText(MainActivity.this,
             					"No supported device found!",

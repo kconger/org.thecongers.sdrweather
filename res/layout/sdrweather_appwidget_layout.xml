@@ -33,7 +33,7 @@
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/logo"
         android:layout_below="@id/label"
-        android:textSize="14sp"
+        android:textSize="12sp"
         android:padding="3dp"
         android:textColor="@android:color/black"
         android:textStyle="italic" />

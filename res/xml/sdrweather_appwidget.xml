@@ -2,7 +2,7 @@
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android" 
     android:minWidth="220dp"
     android:minHeight="72dp"
-    android:updatePeriodMillis="400000"
+    android:updatePeriodMillis="87000000"
     android:initialLayout="@layout/sdrweather_appwidget_layout">
     
 </appwidget-provider>
