@@ -75,38 +75,41 @@ public class MainActivity extends Activity {
     TextView purgeTimeText;
     TextView issueTimeText;
     TextView callsignText;
+    int minBuffSize;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         eventdb = new EventDatabase(this);
         fipsdb = new FipsDatabase(this);
         clcdb = new ClcDatabase(this);
         easdb = new EasDatabase(this);
-        sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         
-        //Purge old events
+        // Purge old events from database
         easdb.purgeExpiredMsg();
         
+        // Audio switch setup
         switch1 = (Switch) findViewById(R.id.switch1);
         switch1.setOnCheckedChangeListener(new OnCheckedChangeListener() {
         	@Override
         	public void onCheckedChanged(CompoundButton buttonView,
         	boolean isChecked) {
-        		Log.d(TAG, "in onChecked" );
         		if ( m_audioTrack != null ) {
         			if (isChecked) {
-        				Log.d(TAG, "is Checked" );
+        				Log.d(TAG, "Audio is set to on" );
         				m_audioTrack.setStereoVolume(1.0f, 1.0f);
         			} else {
-        				Log.d(TAG, "is not Checked" );
+        				Log.d(TAG, "Audio is set to off" );
         				m_audioTrack.setStereoVolume(0.0f, 0.0f);
         			}
         		}
         		}
         	});
+        
+        // Set initial audio switch from preferences
         if (sharedPrefs.getBoolean("prefStartAudio", true)) {
         	switch1.setChecked(true);
         } else {
@@ -122,10 +125,9 @@ public class MainActivity extends Activity {
         issueTimeText = (TextView) findViewById(R.id.textView5);
         callsignText = (TextView) findViewById(R.id.textView6);
         
-        //Set Initial Frequency From Preferences
+        // Set initial frequency from preferences
         spinner1 = (Spinner) findViewById(R.id.spinner1);
         int freq = Integer.parseInt(sharedPrefs.getString("prefDefaultFreq", "6"));
-        Log.d(TAG, "Freq set to: " + freq );
         spinner1.setSelection(freq);
         
         // Show last currently active event if available
@@ -149,8 +151,6 @@ public class MainActivity extends Activity {
 	    	purgeTimeText.setText("Expires at: " + easmsg.getString(easmsg.getColumnIndex("purgetime")));
 	    	issueTimeText.setText("Issue Time: " + easmsg.getString(easmsg.getColumnIndex("timeissued")));
 	    	callsignText.setText("Call Sign: " + easmsg.getString(easmsg.getColumnIndex("callsign")));
-	    } else {
-	    	Log.d(TAG, "No event");
 	    }
         
         // Get data root
@@ -183,19 +183,19 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        // Update display with latest active event in the database
         easdb = new EasDatabase(this);
-        evLvlText = (TextView) findViewById(R.id.textView7);
-        evDescText = (TextView) findViewById(R.id.textView8);
-        regionsText = (TextView) findViewById(R.id.textView9);
-        orgText = (TextView) findViewById(R.id.textView1);
-        purgeTimeText = (TextView) findViewById(R.id.textView4);
-        issueTimeText = (TextView) findViewById(R.id.textView5);
-        callsignText = (TextView) findViewById(R.id.textView6);
-        // Show last currently active event if available
         Cursor easmsg = easdb.getActiveEvent();  
 	    if( easmsg != null && easmsg.moveToFirst() ){
-	    	Log.d(TAG, "(onResume)Trying to display an event!");
+	    	evLvlText = (TextView) findViewById(R.id.textView7);
+	        evDescText = (TextView) findViewById(R.id.textView8);
+	        regionsText = (TextView) findViewById(R.id.textView9);
+	        orgText = (TextView) findViewById(R.id.textView1);
+	        purgeTimeText = (TextView) findViewById(R.id.textView4);
+	        issueTimeText = (TextView) findViewById(R.id.textView5);
+	        callsignText = (TextView) findViewById(R.id.textView6);
 	    	String level = easmsg.getString(easmsg.getColumnIndex("level"));
+	    	// Show last currently active event if available
 	    	evLvlText.setText(level);
 	    	if("Test".equals(level)){
 				evLvlText.setBackgroundResource(R.color.white);
@@ -224,44 +224,44 @@ public class MainActivity extends Activity {
     }
     */
 
+	// Start button press
     public void onClickStart(View view)
     {
-    	// Start Pressed
     	Log.d(TAG, "Start Pressed" );
     	if (RootTools.isRootAvailable() && RootTools.isBusyboxAvailable()) {
-    		// Get Frequency and gain
+    		// Get Frequency and gain from preferences
     		String freq = String.valueOf(spinner1.getSelectedItem());
     		String gain = sharedPrefs.getString("prefGain", "42");
     		// Call for process to start
     		mTask = new RtlTask();
     		mTask.execute(freq,gain);
+    		// Start audio
     		audioStart();
+    		// Check for mute status and set
     		if (switch1.isChecked()) {
     			m_audioTrack.setStereoVolume(1.0f, 1.0f);
     		} else {
     			m_audioTrack.setStereoVolume(0.0f, 0.0f);
     		}
-    		
-    		//audioStart();
     	} else {
-    		// Display message about lack of root
+    		// Display message about lack of root and or busybox
     		if (!RootTools.isRootAvailable()) {
     			Toast.makeText(MainActivity.this,
     					"Root Access Not Available!",
     					Toast.LENGTH_SHORT).show();
     		} else if (!RootTools.isBusyboxAvailable()) {
+    			// Offer busybox if not installed
     			RootTools.offerBusyBox(MainActivity.this);   			
     		}
     	}
     }
     
+    // Stop button press
     public void onClickStop(View view)
     {
-    	// Stop Pressed
     	Log.d(TAG, "Stop Pressed" );
     	audioStop();
     	mTask.stop();
-
     }
     
     Runnable m_audioGenerator = new Runnable()
@@ -272,55 +272,60 @@ public class MainActivity extends Activity {
             
             FileInputStream audioStream = null;
             try {
-            	Log.d(TAG, "Setting audio stream to: " + dataRoot + "/pipe" );
                 audioStream = new FileInputStream(dataRoot + "/pipe");
             } catch (FileNotFoundException e) {
             	e.printStackTrace();
             	Log.d(TAG, "Named Pipe Not Found" );
             }
             int bytesRead = 0;
-            byte [] audioData = new byte[1024];
+            byte [] audioData = new byte[minBuffSize/2]; // Was 1024
             Log.d(TAG, "Write Audio Out" );
             while(!m_stop) {
             	try {
-					bytesRead = audioStream.read(audioData, 0, 1024);
+					bytesRead = audioStream.read(audioData, 0, audioData.length); // Was 1024
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-            	m_audioTrack.write(audioData, 0, bytesRead);   
-            	//m_audioTrack.write(audioData, 0, audioData.length); 
+            	//m_audioTrack.write(audioData, 0, bytesRead);   
+            	m_audioTrack.write(audioData, 0, audioData.length); 
             }
         }
     };
 
+    // Start audio
     void audioStart()
     {
         m_stop = false;
+        // Get buffer size
+        minBuffSize = AudioTrack.getMinBufferSize(22050, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
+        
+        // Setup AudioTrack settings
         m_audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 22050, AudioFormat.CHANNEL_OUT_MONO,
-                                        AudioFormat.ENCODING_PCM_16BIT, 22050 /* 1 second buffer */,
+                                        AudioFormat.ENCODING_PCM_16BIT, minBuffSize /* 1 second buffer */,
                                         AudioTrack.MODE_STREAM);
         m_audioTrack.play();
         m_audioThread = new Thread(m_audioGenerator);
         m_audioThread.start();
     }
 
+    // Stop audio
     void audioStop()
     {
         m_stop = true;
         m_audioTrack.stop();
     }   
 
-    // Draw Options Menu
+    // Draw options menu
     @Override
 	public boolean onCreateOptionsMenu(Menu menu)
     {
-		// Inflate the menu; this adds items to the action bar if it is present.
+		// Inflate the menu
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
     
-    // When Settings Menu is selected
+    // When settings menu is selected
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
@@ -336,6 +341,7 @@ public class MainActivity extends Activity {
     	}
     }
     
+    //Runs when settings are updated
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
@@ -346,18 +352,21 @@ public class MainActivity extends Activity {
         }
     }
     
+    // Update UI when settings are updated
     private void updateUserSettings() 
     {
-    	 int freq = Integer.parseInt(sharedPrefs.getString("prefDefaultFreq", "6"));
-         Log.d(TAG, "Updating freqency spinner to index: " + freq );
-         spinner1.setSelection(freq);
-         if (sharedPrefs.getBoolean("prefStartAudio", true)) {
-         	switch1.setChecked(true);
-         } else {
+    	// Update frequency selector
+    	int freq = Integer.parseInt(sharedPrefs.getString("prefDefaultFreq", "6"));
+        spinner1.setSelection(freq);
+        // Update audio switch
+        if (sharedPrefs.getBoolean("prefStartAudio", true)) {
+        	switch1.setChecked(true);
+        } else {
          	switch1.setChecked(false);
-         }
+        }
      }
     
+    // Send Notification
     private void Notify(String notificationTitle, String notificationMessage, int notificationID) 
     {
     	  NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -375,7 +384,6 @@ public class MainActivity extends Activity {
     	  notification.flags |= Notification.FLAG_AUTO_CANCEL;
     	  // Send notification
     	  notificationManager.notify(notificationID, notification);
-    	  
     }
  
     class RtlTask extends AsyncTask<String, Void, Void> {
@@ -396,13 +404,14 @@ public class MainActivity extends Activity {
 
         }
 
+        // Stop the process
         public void stop() {
             Process p = mProcess;
             if (p != null) {
                 p.destroy();
             }
             cancel(true);
-            // Kill Processes Fail Safe
+            // Kill process fail safe
             StringBuilder command1 = new StringBuilder("/system/xbin/su -c killall -9 ");
             command1.append("rtl_fm");
             StringBuilder command2 = new StringBuilder("/system/xbin/su -c killall -9 ");
@@ -417,13 +426,11 @@ public class MainActivity extends Activity {
         @Override
         protected Void doInBackground(String... params) {
             try {
-            	Log.d(TAG, "Excuting command");
+            	Log.d(TAG, "Excuting native code");
+            	// Build command and execute
             	String dataRoot = getApplicationContext().getFilesDir().getParentFile().getPath();
-            	Log.d(TAG, "Got data root: "+ dataRoot);
-            	Log.d(TAG, "Frequency Selected: "+ params[0]);
-            	Log.d(TAG, "Gain: "+ params[1]);
-            	String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -f " + params[0] + "M -s 22050 -g " + params[1] + " | tee " + dataRoot + "/pipe | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
             	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/multimon-ng" };
+            	String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -f " + params[0] + "M -s 22050 -g " + params[1] + " | tee " + dataRoot + "/pipe | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
                 mProcess = new ProcessBuilder()
                     .command(cmd)
                     .redirectErrorStream(true)
@@ -457,12 +464,8 @@ public class MainActivity extends Activity {
 		@Override
         protected void onProgressUpdate(Void... values) {
             try {
-                // Is a line ready to read from the command?
                 while (mReader.ready()) {
                 	String currentLine = mReader.readLine();
-                	// Display command output
-                    mText.append(currentLine + "\n");
-                    Log.d(TAG, "Output: " + currentLine);
                     // Check for alert
                     if (currentLine.contains("EAS:")) {
         				Log.d(TAG, "Found EAS Alert, parsing.....");
@@ -473,14 +476,14 @@ public class MainActivity extends Activity {
         				String callSign = null;
         				int notificationID = 0;
         				
-        				// Start parsing message
+        				// Start parsing message into fields
         				String [] rawEASMsg = currentLine.split(":");
         				rawEASMsg[1] = rawEASMsg[1].trim();
         				String [] easMsg = rawEASMsg[1].split("-");
         				int size = easMsg.length;
         				Log.d(TAG, "# of fields: " + size);
         				
-        				//Check to see if its a real message
+        				//Check to see if message has minimum number of fields
         				if (size > 5 ) {
         					/*
         					 * Information from: http://en.wikipedia.org/wiki/Specific_Area_Message_Encoding
@@ -501,11 +504,11 @@ public class MainActivity extends Activity {
         					String eee = easMsg[2];
         					Log.d(TAG, "Event Code: " + eee);
         					//Look up event code in database, return level and description
-        					Log.d(TAG, "Looking up event code information for: " + eee);
         					events = eventdb.getEventInfo(eee);
         					if( events != null && events.moveToFirst() ){
         						eventlevel = events.getString(events.getColumnIndex("eventlevel"));
         						evLvlText.setText(eventlevel);
+        						// Set TextView background color to represent event level
         						if("Test".equals(eventlevel)){
         							evLvlText.setBackgroundResource(R.color.white);
         							notificationID = 1;
@@ -538,16 +541,16 @@ public class MainActivity extends Activity {
         					String [] locationCodes = new String[size - 5];
         					
         					regionsText.setText("Regions Affected: ");
-        					//Get Country From Preferences
-        					int country = Integer.parseInt(sharedPrefs.getString("prefDefaultCountry", "0"));
-        					Log.d(TAG, "Country Code: " + country);
         					StringBuilder regions = new StringBuilder("");
-        					if( country == 0 ){
+        					
+        					// Get country from preferences and look up region codes from appropriate database
+        					int country = Integer.parseInt(sharedPrefs.getString("prefDefaultCountry", "0"));
+        					if( country == 0 ){ // United States
         						for (int i=3; i < size - 2; i++) {
         							locationCodes[j] = easMsg[i];
         							Log.d(TAG, "Location Code: " + locationCodes[j]);
         							
-        							//Look up fips code in database, return county and state
+        							// Look up fips code in database, return county and state
         							String fipscode = locationCodes[j].substring(1, 6);
         							Log.d(TAG, "Looking up county/state for fips code: " + fipscode);
         							fips = fipsdb.getCountyState(fipscode);
@@ -558,12 +561,12 @@ public class MainActivity extends Activity {
         							}
         							j++;
         						}
-        					}else if( country == 1 ){
+        					}else if( country == 1 ){ // Canada
         						for (int i=3; i < size - 2; i++) {
         							locationCodes[j] = easMsg[i];
         							Log.d(TAG, "Location Code: " + locationCodes[j]);
 
-        							//Look up clc code in database, return region and province/territory
+        							// Look up clc code in database, return region and province/territory
         							String clccode = locationCodes[j].substring(1, 6);
         							Log.d(TAG, "Looking up region and province/territory information for clc code: " + clccode);
         							clc = clcdb.getCountyState(clccode);
@@ -592,7 +595,6 @@ public class MainActivity extends Activity {
         					 * HHMM is the hours and minutes (24-hour format), in UTC, with leading zeros
         					 */
         					String timeOfIssue = easMsg[size - 2];
-        					Log.d(TAG, "Time of issue (Ordinal Date): " + timeOfIssue);
         				
         					// Parse and convert date and time
         					String jjj = timeOfIssue.substring(0, 3);
@@ -601,7 +603,6 @@ public class MainActivity extends Activity {
         					int day = Integer.parseInt(jjj);
         					int year = Calendar.getInstance().get(Calendar.YEAR);
         					String convDate = formatOrdinal(year, day);
-        					Log.d(TAG, "Time of issue (UTC): " + convDate + " " + hh + ":" + mm + " UTC");
         				
         					// Convert UTC to local time 
         					SimpleDateFormat utcFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -609,12 +610,11 @@ public class MainActivity extends Activity {
         					Date date = utcFormat.parse(convDate + "T" + hh + ":" + mm + ":00.000Z");
         					SimpleDateFormat defaultFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
         					defaultFormat.setTimeZone(TimeZone.getDefault());
-        					
         					localTimeOfIssue = defaultFormat.format(date);
         					Log.d(TAG, "Time of issue (Local): " + localTimeOfIssue);
         					issueTimeText.setText("Time of issue: " + localTimeOfIssue);
         					
-        					// Get Current Date/Time
+        					// Get current date/time
         					Calendar cal = Calendar.getInstance();
         					Date date2 = cal.getTime();
 
@@ -623,7 +623,7 @@ public class MainActivity extends Activity {
         					String curdate = formatter.format(date2);
         					Log.d(TAG, "Message Received at (UTC): " + curdate);
         					
-        					// Calculate EAS MSG Expiration Date/Time
+        					// Calculate EAS event expiration date/time
         					cal.clear();
         					cal.setTime(date);
         					Date idate = cal.getTime();
@@ -638,7 +638,7 @@ public class MainActivity extends Activity {
         					Date edate = cal.getTime();
         					formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         					String expdate = formatter.format(edate);
-        					Log.d(TAG, "MSG Expires (UTC): " + expdate);
+        					Log.d(TAG, "Expires at (UTC): " + expdate);
         					// TODO covert to local time
         					purgeTimeText.setText("Expires at:" + expdate);
         				
@@ -651,15 +651,15 @@ public class MainActivity extends Activity {
         					Log.d(TAG, "Call Sign: " + callSign);
         					callsignText.setText("Call Sign: " + callSign);
         					
+        					//Update EAS event database
+        					easdb.addEasMsg (new EasMsg(org, eventdesc, eventlevel, curdate, issuedate, callSign, expdate, regions.toString(), sharedPrefs.getString("prefDefaultCountry", "0")));
+        					
         					// Send a notification
         					Notify("EAS " + eventlevel + " from " + callSign,
         							eventdesc + " was issued", notificationID);
         					
-        					//Update EAS MSG database
-        					easdb.addEasMsg (new EasMsg(org, eventdesc, eventlevel, curdate, issuedate, callSign, expdate, regions.toString(), sharedPrefs.getString("prefDefaultCountry", "0")));
-        					
-        					//Update Widget
-        					sdrWidgetProvider.updateWidgetContent(getBaseContext(), 
+        					// Tell widget to update
+        					SdrWidgetProvider.updateWidgetContent(getBaseContext(), 
         					    AppWidgetManager.getInstance(getBaseContext()));
         				
         					}
@@ -667,7 +667,15 @@ public class MainActivity extends Activity {
         		    	Toast.makeText(MainActivity.this,
             					"No supported device found!",
             					Toast.LENGTH_SHORT).show();
+        		    } else if (currentLine.contains("warning: noninteger number of samples read")) {
+        		    	// Drop this message 
+        		    	
+        		    } else {
+                    	// Display command output
+                        mText.append(currentLine + "\n");
+                        //Log.d(TAG, "Output: " + currentLine);
         		    }
+        		    
                     
                 }
             } catch (IOException t) {
@@ -678,7 +686,7 @@ public class MainActivity extends Activity {
         }
     }
     
-    // File Copy Function
+    // File copy function
  	private static void copyFile(String assetPath, String localPath, Context context) {
  	    try {
  	        InputStream in = context.getAssets().open(assetPath);
@@ -697,7 +705,7 @@ public class MainActivity extends Activity {
  	    }
  	}
  	
- 	// Convert Ordinal date format to simple
+ 	// Convert ordinal date format to simple
 	@SuppressLint("SimpleDateFormat")
 	static String formatOrdinal(int year, int day) {
 		  Calendar cal = Calendar.getInstance();

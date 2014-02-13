@@ -18,7 +18,7 @@ public class EasMsg {
 	    public EasMsg(){
 	         
 	    }
-	    // constructor
+	    // Constructor
 	    public EasMsg(String org, String desc, String level, 
 	    		String timereceived, String timeissued, String callsign, 
 	    		String purgetime, String regions, String country) {

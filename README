@@ -17,12 +17,12 @@ Current Features:
 * Decode EAS Alerts US/Canada
 * Selectable Frequencies
 * Alert Notifications
+* Widget to display alerts
 * Offline FIPS and CLC Location Code Databases
 * Offline Event Code Database
 
 Future:
 * Pretty up interface
-* Widget to display alerts
 * Check to see if you are in currently affected region
 
 To build:

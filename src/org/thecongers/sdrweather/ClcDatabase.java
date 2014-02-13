@@ -16,6 +16,7 @@ public class ClcDatabase extends SQLiteAssetHelper {
         setForcedUpgrade();
     }
     
+    // Return region and province/territory from CLC code
     public Cursor getCountyState(String clccode) {
 
         SQLiteDatabase db = getReadableDatabase();
@@ -23,15 +24,14 @@ public class ClcDatabase extends SQLiteAssetHelper {
 
         String [] sqlSelect = {"provinceterritory", "region"}; 
         String sqlTables = "clc";
-
         qb.setTables(sqlTables);
         Cursor c = qb.query(db, sqlSelect, "clccode=?", new String[] { String.valueOf(clccode) }, null, null, null);
         if (c != null)
             c.moveToFirst();
         
-     	// Closing database connection
         db.close();
         return c;
         
     }
+    
 }

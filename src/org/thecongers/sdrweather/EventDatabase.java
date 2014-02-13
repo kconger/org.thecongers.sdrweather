@@ -17,20 +17,19 @@ public class EventDatabase extends SQLiteAssetHelper {
         setForcedUpgrade();
     }
     
+    // Get event information from event code
     public Cursor getEventInfo(String evcode) {
-
+    	
         SQLiteDatabase db = getReadableDatabase();
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
 
         String [] sqlSelect = {"eventdesc", "eventlevel"}; 
         String sqlTables = "EASEvents";
-
         qb.setTables(sqlTables);
         Cursor c = qb.query(db, sqlSelect, "eventcode=?", new String[] { String.valueOf(evcode) }, null, null, null);
         if (c != null)
             c.moveToFirst();
 
-        // Closing database connection
         db.close();
         return c;
         

@@ -10,8 +10,8 @@ import android.database.Cursor;
 import android.util.Log;
 import android.widget.RemoteViews;
 
-public class sdrWidgetProvider extends AppWidgetProvider {
-	public static final String DEBUG_TAG = "sdrWidgetProvider";
+public class SdrWidgetProvider extends AppWidgetProvider {
+	public static final String TAG = "SDRWeatherWidget";
 	 
 	   @Override
 	   public void onUpdate(Context context, AppWidgetManager appWidgetManager,
@@ -20,7 +20,7 @@ public class sdrWidgetProvider extends AppWidgetProvider {
 	      try {
 	         updateWidgetContent(context, appWidgetManager);
 	      } catch (Exception e) {
-	         Log.e(DEBUG_TAG, "Failed", e);
+	         Log.d(TAG, "Failed", e);
 	      }
 	   }
 	 
@@ -32,6 +32,7 @@ public class sdrWidgetProvider extends AppWidgetProvider {
 	      RemoteViews remoteView = new RemoteViews(context.getPackageName(),      
 	            R.layout.sdrweather_appwidget_layout);
 	      
+	      // Lookup and display latest active event
 	      Cursor easmsg = easdb.getActiveEvent();
 	      if( easmsg != null && easmsg.moveToFirst() ){
 	    	  String eventlevel = easmsg.getString(easmsg.getColumnIndex("level"));
@@ -41,15 +42,15 @@ public class sdrWidgetProvider extends AppWidgetProvider {
 	    	  remoteView.setTextViewText(R.id.alert, "No Active Events");
 	      }
 	 
+	      // Launch app when widget is pressed
 	      Intent launchAppIntent = new Intent(context, MainActivity.class);
 	      PendingIntent launchAppPendingIntent = PendingIntent.getActivity(context, 
-	            0, launchAppIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-	      
+	            0, launchAppIntent, PendingIntent.FLAG_UPDATE_CURRENT);     
 	      remoteView.setOnClickPendingIntent(R.id.full_widget, launchAppPendingIntent);
 	 
-	      ComponentName tutListWidget = new ComponentName(context, 
-	            sdrWidgetProvider.class);
-	      appWidgetManager.updateAppWidget(tutListWidget, remoteView);
+	      ComponentName sdrWidget = new ComponentName(context, 
+	            SdrWidgetProvider.class);
+	      appWidgetManager.updateAppWidget(sdrWidget, remoteView);
 	   }
 
 }

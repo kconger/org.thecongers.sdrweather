@@ -24,40 +24,40 @@ public class EasDatabase extends SQLiteAssetHelper {
 	private static final String TAG = "EASDB";
 
     public EasDatabase(Context context) {
+    	
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         setForcedUpgrade();
+        
     }
     
-    //Get Current Active Event
+    //Get current active event
 	public Cursor getActiveEvent() {
 
-        SQLiteDatabase db = this.getReadableDatabase();
-        SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
-
-        String [] sqlSelect = {"org", "desc", "level", "timereceived", "timeissued", "callsign", "purgetime", "regions", "country"}; 
-        String sqlTables = "easMsg";
-
-        qb.setTables(sqlTables);
-        
         // Get current time in UTC
         Calendar cal = Calendar.getInstance();
 		Date date = cal.getTime();
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 		String curdate = formatter.format(date);
-        
+		
+        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+
+        String [] sqlSelect = {"org", "desc", "level", "timereceived", "timeissued", "callsign", "purgetime", "regions", "country"}; 
+        String sqlTables = "easMsg";
+        qb.setTables(sqlTables);
         Cursor c = qb.query(db, sqlSelect, "purgetime>=?", new String[] { String.valueOf(curdate) }, null, null, "datetime(purgetime) DESC LIMIT 1");
         if (c != null) {
             c.moveToFirst();
         }
-        // Closing database connection
         db.close();
         return c;
-        
-        
+              
     }
     
+	// Add event to database
     void addEasMsg(EasMsg easmsg) {
+    	
     	Log.d(TAG, "Adding event to database");
     	SQLiteDatabase db = this.getWritableDatabase();
     	String sqlTables = "easMsg";
@@ -75,8 +75,8 @@ public class EasDatabase extends SQLiteAssetHelper {
  
         // Inserting Row
         db.insert(sqlTables, null, values);
-        // Closing database connection
         db.close();
+        
     }
     
     // Purge expired events
@@ -97,6 +97,7 @@ public class EasDatabase extends SQLiteAssetHelper {
     	db.execSQL("VACUUM");
     	// Closing database connection
     	db.close();
+    	
     }
 
 }
