@@ -277,17 +277,15 @@ public class MainActivity extends Activity {
             	e.printStackTrace();
             	Log.d(TAG, "Named Pipe Not Found" );
             }
-            int bytesRead = 0;
-            byte [] audioData = new byte[minBuffSize/2]; // Was 1024
+            byte [] audioData = new byte[minBuffSize/2]; 
             Log.d(TAG, "Write Audio Out" );
             while(!m_stop) {
             	try {
-					bytesRead = audioStream.read(audioData, 0, audioData.length); // Was 1024
+					audioStream.read(audioData, 0, audioData.length);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-            	//m_audioTrack.write(audioData, 0, bytesRead);   
             	m_audioTrack.write(audioData, 0, audioData.length); 
             }
         }
@@ -302,8 +300,7 @@ public class MainActivity extends Activity {
         
         // Setup AudioTrack settings
         m_audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 22050, AudioFormat.CHANNEL_OUT_MONO,
-                                        AudioFormat.ENCODING_PCM_16BIT, minBuffSize /* 1 second buffer */,
-                                        AudioTrack.MODE_STREAM);
+                                        AudioFormat.ENCODING_PCM_16BIT, minBuffSize, AudioTrack.MODE_STREAM);
         m_audioTrack.play();
         m_audioThread = new Thread(m_audioGenerator);
         m_audioThread.start();
@@ -468,6 +465,9 @@ public class MainActivity extends Activity {
                 	String currentLine = mReader.readLine();
                     // Check for alert
                     if (currentLine.contains("EAS:")) {
+                    	// Display command output
+                        mText.append(currentLine + "\n");
+                        
         				Log.d(TAG, "Found EAS Alert, parsing.....");
         				String org = null;
         				String eventlevel = null;
@@ -664,6 +664,9 @@ public class MainActivity extends Activity {
         				
         					}
         		    } else if (currentLine.contains("No supported devices found")) {
+        		    	// Display command output
+                        mText.append(currentLine + "\n");
+                        // Send toast
         		    	Toast.makeText(MainActivity.this,
             					"No supported device found!",
             					Toast.LENGTH_SHORT).show();
