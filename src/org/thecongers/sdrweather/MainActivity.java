@@ -11,10 +11,12 @@ import java.io.LineNumberReader;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.security.MessageDigest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import android.media.AudioFormat;
@@ -65,7 +67,8 @@ public class MainActivity extends Activity {
     boolean m_stop = false;
     AudioTrack m_audioTrack;
     Thread m_audioThread;
-    Button startButten;
+    Button startButton;
+    Button stopButton;
     Switch switch1;
     TextView mText;
     TextView evLvlText;
@@ -124,6 +127,8 @@ public class MainActivity extends Activity {
         purgeTimeText = (TextView) findViewById(R.id.textView4);
         issueTimeText = (TextView) findViewById(R.id.textView5);
         callsignText = (TextView) findViewById(R.id.textView6);
+        startButton = (Button) findViewById(R.id.button1);
+        stopButton = (Button) findViewById(R.id.button2);
         
         // Set initial frequency from preferences
         spinner1 = (Spinner) findViewById(R.id.spinner1);
@@ -670,6 +675,7 @@ public class MainActivity extends Activity {
         		    	Toast.makeText(MainActivity.this,
             					"No supported device found!",
             					Toast.LENGTH_SHORT).show();
+        		    	stopButton.performClick();
         		    } else if (currentLine.contains("warning: noninteger number of samples read")) {
         		    	// Drop this message 
         		    	
@@ -692,16 +698,67 @@ public class MainActivity extends Activity {
     // File copy function
  	private static void copyFile(String assetPath, String localPath, Context context) {
  	    try {
- 	        InputStream in = context.getAssets().open(assetPath);
- 	        FileOutputStream out = new FileOutputStream(localPath);
- 	        int read;
- 	        byte[] buffer = new byte[4096];
- 	        while ((read = in.read(buffer)) > 0) {
- 	            out.write(buffer, 0, read);
- 	        }
- 	        out.close();
- 	        in.close();
- 	        Log.d(TAG, "File " + assetPath + " copied successfully.");
+ 	    	// Check if file exists
+ 	    	File existFile = new File(localPath);
+ 	    	if(existFile.exists()) {
+ 	    		Log.d(TAG, "File " + assetPath + " already exists!");
+ 	    		
+ 	    		// Get existing filse md5sum for comparison
+ 	    		String existingFileMD5 = fileToMD5(localPath);
+ 	    		
+ 	    		// Copy file to a temp location
+ 	    		InputStream in = context.getAssets().open(assetPath);
+ 	    		FileOutputStream out = new FileOutputStream(localPath + "-tmp");
+ 	    		int read;
+ 	    		byte[] buffer = new byte[4096];
+ 	    		while ((read = in.read(buffer)) > 0) {
+ 	    			out.write(buffer, 0, read);
+ 	    		}
+ 	    		out.close();
+ 	    		in.close();
+ 	    		Log.d(TAG, "File " + assetPath + " copied to temp location");
+ 	    		
+ 	    		// Get package files md5sum for comparison
+ 	    		String packagedFileMD5 = fileToMD5(localPath + "-tmp");
+ 	    		
+ 	    		// Compare md5sums
+ 	    		if ( existingFileMD5.equals(packagedFileMD5) ) {
+ 	    			// Files are identical
+ 	    			Log.d(TAG, "File " + assetPath + " is already up to date.");
+ 	    			// Delete temp file
+ 	    			File file = new File(localPath + "-tmp");
+ 	    			boolean deleted = file.delete();
+ 	    			if (deleted) {
+ 	    				Log.d(TAG, "File " + localPath + "-tmp deleted");
+ 	    			} else {
+ 	    				Log.d(TAG, "File " + localPath + "-tmp had a problem deleting");
+ 	    			}
+ 	    		} else {
+ 	    			// Copy packaged version over installed version
+ 	    			InputStream in2 = new FileInputStream(localPath + "-tmp");
+ 	    			FileOutputStream out2 = new FileOutputStream(localPath);
+ 	    			int read2;
+ 	    			byte[] buffer2 = new byte[4096];
+ 	    			while ((read2 = in2.read(buffer2)) > 0) {
+ 	    				out2.write(buffer2, 0, read2);
+ 	    			}
+ 	    			out2.close();
+ 	    			in2.close();
+ 	    			Log.d(TAG, "File " + assetPath + " updated!");
+ 	    		}
+ 	    	} else {
+ 	    		// File doesn't exist so go ahead and copy it
+ 	    		InputStream in = context.getAssets().open(assetPath);
+ 	    		FileOutputStream out = new FileOutputStream(localPath);
+ 	    		int read;
+ 	    		byte[] buffer = new byte[4096];
+ 	    		while ((read = in.read(buffer)) > 0) {
+ 	    			out.write(buffer, 0, read);
+ 	    		}
+ 	    		out.close();
+ 	    		in.close();
+ 	    		Log.d(TAG, "File " + assetPath + " copied successfully!");
+ 	    		}
 
  	    } catch (IOException e) {
  	        throw new RuntimeException(e);
@@ -718,5 +775,41 @@ public class MainActivity extends Activity {
 		  Date date = cal.getTime();
 		  SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 		  return formatter.format(date);
+	}
+	
+	// Get a files md5sum
+	public static String fileToMD5(String filePath) {
+	    InputStream inputStream = null;
+	    try {
+	        inputStream = new FileInputStream(filePath);
+	        byte[] buffer = new byte[1024];
+	        MessageDigest digest = MessageDigest.getInstance("MD5");
+	        int numRead = 0;
+	        while (numRead != -1) {
+	            numRead = inputStream.read(buffer);
+	            if (numRead > 0)
+	                digest.update(buffer, 0, numRead);
+	        }
+	        byte [] md5Bytes = digest.digest();
+	        return convertHashToString(md5Bytes);
+	    } catch (Exception e) {
+	        return null;
+	    } finally {
+	        if (inputStream != null) {
+	            try {
+	                inputStream.close();
+	            } catch (Exception e) { }
+	        }
+	    }
+	}
+
+	// Convert md5 hash to string
+	@SuppressLint("DefaultLocale")
+	private static String convertHashToString(byte[] md5Bytes) {
+	    String returnVal = "";
+	    for (int i = 0; i < md5Bytes.length; i++) {
+	        returnVal += Integer.toString(( md5Bytes[i] & 0xff ) + 0x100, 16).substring(1);
+	    }
+	    return returnVal.toUpperCase(Locale.US);
 	}
 }
