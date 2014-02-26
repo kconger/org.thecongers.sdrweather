@@ -37,9 +37,20 @@ public class SdrWidgetProvider extends AppWidgetProvider {
 	      if( easmsg != null && easmsg.moveToFirst() ){
 	    	  String eventlevel = easmsg.getString(easmsg.getColumnIndex("level"));
 	    	  String eventdesc = easmsg.getString(easmsg.getColumnIndex("desc"));
-	    	  remoteView.setTextViewText(R.id.alert, eventlevel + ": " + eventdesc);
+	    	  StringBuilder message = new StringBuilder(eventdesc);
+	    	  
+	    	  int numEvents = easmsg.getCount();
+	    	  Log.d(TAG, "Number of active events: " + String.valueOf(numEvents));
+	    	  if (numEvents > 1){
+	    		  if (numEvents == 2){
+	    			  message.append("\n and " + String.valueOf(numEvents - 1 ) + " other event..." );
+	    		  } else {
+	    			  message.append("\n and " + String.valueOf(numEvents - 1 ) + " other events..." );
+	    		  }
+	    	  }
+	    	  remoteView.setTextViewText(R.id.alert, message);
 	      } else {
-	    	  remoteView.setTextViewText(R.id.alert, "No Active Events");
+	    	  remoteView.setTextViewText(R.id.alert, "No Active Events Recieved");
 	      }
 	 
 	      // Launch app when widget is pressed

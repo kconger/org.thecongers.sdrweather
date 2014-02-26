@@ -29,6 +29,12 @@
             android:defaultValue="42"
             android:key="prefGain"
             />
+    	<EditTextPreference
+        	android:title="@string/pref_sqel_name"
+            android:summary="@string/pref_sqel_summary"
+            android:defaultValue="0"
+            android:key="prefSqel"
+            />
     </PreferenceCategory>
 
 </PreferenceScreen>

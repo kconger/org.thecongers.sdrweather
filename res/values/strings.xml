@@ -40,7 +40,9 @@
     <string name="pref_freq_name">Default Frequency</string>
     <string name="pref_freq_summary">Default frequency on launch.</string>
     <string name="pref_gain_name">Gain</string>
-    <string name="pref_gain_summary">A floating point gain value. The dongle will use the closest gain setting available.</string>   
+    <string name="pref_gain_summary">A floating point gain value. The dongle will use the closest gain setting available.</string>
+    <string name="pref_sqel_name">Squelch</string>
+    <string name="pref_sqel_summary">Squelch values are extremely sensitive to external conditions (noise and antenna). When in doubt, start at zero and work upwards.</string>    
     <string name="uisettings">UI Settings</string>
     <string name="pref_country_name">Country</string>
     <string name="pref_country_summary">Country used for location code lookups.</string>

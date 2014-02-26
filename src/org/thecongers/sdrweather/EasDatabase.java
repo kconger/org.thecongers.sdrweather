@@ -46,7 +46,8 @@ public class EasDatabase extends SQLiteAssetHelper {
         String [] sqlSelect = {"org", "desc", "level", "timereceived", "timeissued", "callsign", "purgetime", "regions", "country"}; 
         String sqlTables = "easMsg";
         qb.setTables(sqlTables);
-        Cursor c = qb.query(db, sqlSelect, "purgetime>=?", new String[] { String.valueOf(curdate) }, null, null, "datetime(purgetime) DESC LIMIT 1");
+        //Cursor c = qb.query(db, sqlSelect, "purgetime>=?", new String[] { String.valueOf(curdate) }, null, null, "datetime(purgetime) DESC LIMIT 1");
+        Cursor c = qb.query(db, sqlSelect, "purgetime>=?", new String[] { String.valueOf(curdate) }, null, null, "datetime(purgetime) DESC");
         if (c != null) {
             c.moveToFirst();
         }

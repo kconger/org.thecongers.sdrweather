@@ -164,8 +164,8 @@ public class MainActivity extends Activity {
     	// Create directory for binaries
     	File nativeDirectory = new File(binDir);
     	nativeDirectory.mkdirs();
-    	// Copy binaries
-    	//copyFile("nativeFolder/test",dataRoot + "/nativeFolder/multimon-ng",getBaseContext());
+    	// Copy binary assets
+    	copyFile("nativeFolder/eas-test.raw",dataRoot + "/nativeFolder/eas-test.raw",getBaseContext());
     	copyFile("nativeFolder/multimon-ng",dataRoot + "/nativeFolder/multimon-ng",getBaseContext());
     	copyFile("nativeFolder/rtl_fm",dataRoot + "/nativeFolder/rtl_fm",getBaseContext());
     	// Set execute permissions
@@ -237,9 +237,10 @@ public class MainActivity extends Activity {
     		// Get Frequency and gain from preferences
     		String freq = String.valueOf(spinner1.getSelectedItem());
     		String gain = sharedPrefs.getString("prefGain", "42");
+    		String squelch = sharedPrefs.getString("prefSqel", "0");
     		// Call for process to start
     		mTask = new RtlTask();
-    		mTask.execute(freq,gain);
+    		mTask.execute(freq,gain,squelch);
     		// Start audio
     		audioStart();
     		// Check for mute status and set
@@ -279,7 +280,6 @@ public class MainActivity extends Activity {
             try {
                 audioStream = new FileInputStream(dataRoot + "/pipe");
             } catch (FileNotFoundException e) {
-            	e.printStackTrace();
             	Log.d(TAG, "Named Pipe Not Found" );
             }
             byte [] audioData = new byte[minBuffSize/2]; 
@@ -415,12 +415,9 @@ public class MainActivity extends Activity {
             cancel(true);
             // Kill process fail safe
             StringBuilder command1 = new StringBuilder("/system/xbin/su -c killall -9 ");
-            command1.append("rtl_fm");
-            StringBuilder command2 = new StringBuilder("/system/xbin/su -c killall -9 ");
-            command2.append("multimon-ng");
+            command1.append("rtl_fm multimon-ng");
             try {
     			Runtime.getRuntime().exec(command1.toString());
-    			Runtime.getRuntime().exec(command2.toString());
     		} catch (IOException e) {
     		}
         }
@@ -428,11 +425,15 @@ public class MainActivity extends Activity {
         @Override
         protected Void doInBackground(String... params) {
             try {
-            	Log.d(TAG, "Excuting native code");
+            	Log.d(TAG, "Executing native code");
             	// Build command and execute
             	String dataRoot = getApplicationContext().getFilesDir().getParentFile().getPath();
-            	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/multimon-ng" };
-            	String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -f " + params[0] + "M -s 22050 -g " + params[1] + " | tee " + dataRoot + "/pipe | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
+            	//Test wave
+            	String[] cmd = { "/system/xbin/su", "-c", "cat " + dataRoot + "/nativeFolder/eas-test.raw | tee " + dataRoot + "/pipe | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
+            	// No audio just alert monitoring
+            	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -f " + params[0] + "M -s 22050 -g " + params[1]  + " -l " + params[2] + " | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
+            	// Audio and alert monitoring
+            	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -f " + params[0] + "M -s 22050 -g " + params[1] + " -l " + params[2] + " | tee " + dataRoot + "/pipe | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
                 mProcess = new ProcessBuilder()
                     .command(cmd)
                     .redirectErrorStream(true)
