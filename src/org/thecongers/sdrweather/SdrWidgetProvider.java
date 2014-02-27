@@ -27,8 +27,7 @@ public class SdrWidgetProvider extends AppWidgetProvider {
 	   public static void updateWidgetContent(Context context,
 	      AppWidgetManager appWidgetManager) {
 	       
-		  EasDatabase easdb = new EasDatabase(context);
-		  
+		  EasDatabase easdb = new EasDatabase(context);		  
 	      RemoteViews remoteView = new RemoteViews(context.getPackageName(),      
 	            R.layout.sdrweather_appwidget_layout);
 	      
@@ -39,13 +38,28 @@ public class SdrWidgetProvider extends AppWidgetProvider {
 	    	  String eventdesc = easmsg.getString(easmsg.getColumnIndex("desc"));
 	    	  StringBuilder message = new StringBuilder(eventdesc);
 	    	  
+	    	  // Set TextView background color to represent event level
+	    	  if("Test".equals(eventlevel)){
+	    		  remoteView.setInt(R.id.alert, "setBackgroundColor", 
+	    				  android.graphics.Color.WHITE);
+	    	  }else if("Warning".equals(eventlevel)){
+	    		  remoteView.setInt(R.id.alert, "setBackgroundColor", 
+	    				  android.graphics.Color.RED);
+	    	  }else if("Watch".equals(eventlevel)){
+	    		  remoteView.setInt(R.id.alert, "setBackgroundColor", 
+	    				  android.graphics.Color.YELLOW);
+	    	  }else if("Advisory".equals(eventlevel)){
+	    		  remoteView.setInt(R.id.alert, "setBackgroundColor", 
+	    				  android.graphics.Color.GREEN);
+	    	  }
+	    	  
 	    	  int numEvents = easmsg.getCount();
 	    	  Log.d(TAG, "Number of active events: " + String.valueOf(numEvents));
 	    	  if (numEvents > 1){
 	    		  if (numEvents == 2){
-	    			  message.append("\n and " + String.valueOf(numEvents - 1 ) + " other event..." );
+	    			  message.append("\nand " + String.valueOf(numEvents - 1 ) + " other active event..." );
 	    		  } else {
-	    			  message.append("\n and " + String.valueOf(numEvents - 1 ) + " other events..." );
+	    			  message.append("\nand " + String.valueOf(numEvents - 1 ) + " other active events..." );
 	    		  }
 	    	  }
 	    	  remoteView.setTextViewText(R.id.alert, message);

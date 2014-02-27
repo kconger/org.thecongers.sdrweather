@@ -683,7 +683,7 @@ public class MainActivity extends Activity {
         		    } else {
                     	// Display command output
                         mText.append(currentLine + "\n");
-                        //Log.d(TAG, "Output: " + currentLine);
+                        Log.d(TAG, "Output: " + currentLine);
         		    }
         		    
                     
@@ -702,8 +702,6 @@ public class MainActivity extends Activity {
  	    	// Check if file exists
  	    	File existFile = new File(localPath);
  	    	if(existFile.exists()) {
- 	    		Log.d(TAG, "File " + assetPath + " already exists!");
- 	    		
  	    		// Get existing filse md5sum for comparison
  	    		String existingFileMD5 = fileToMD5(localPath);
  	    		
@@ -717,7 +715,6 @@ public class MainActivity extends Activity {
  	    		}
  	    		out.close();
  	    		in.close();
- 	    		Log.d(TAG, "File " + assetPath + " copied to temp location");
  	    		
  	    		// Get package files md5sum for comparison
  	    		String packagedFileMD5 = fileToMD5(localPath + "-tmp");
@@ -725,15 +722,9 @@ public class MainActivity extends Activity {
  	    		// Compare md5sums
  	    		if ( existingFileMD5.equals(packagedFileMD5) ) {
  	    			// Files are identical
- 	    			Log.d(TAG, "File " + assetPath + " is already up to date.");
  	    			// Delete temp file
  	    			File file = new File(localPath + "-tmp");
- 	    			boolean deleted = file.delete();
- 	    			if (deleted) {
- 	    				Log.d(TAG, "File " + localPath + "-tmp deleted");
- 	    			} else {
- 	    				Log.d(TAG, "File " + localPath + "-tmp had a problem deleting");
- 	    			}
+ 	    			file.delete();
  	    		} else {
  	    			// Copy packaged version over installed version
  	    			InputStream in2 = new FileInputStream(localPath + "-tmp");
