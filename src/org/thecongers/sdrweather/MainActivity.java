@@ -156,8 +156,8 @@ public class MainActivity extends Activity {
 					color = "GREEN";
 				}
 	    		String htmlText = "<p><b><font color=" + color + ">" + level + "</font></b>" + "<br />" + desc + 
-	    				"<br /><b>Time issued: </b>" + timeissued + "<br /><b>Expires at: </b>" + 
-	    				purgetime + "<br /><b>Regions affected: </b>" + regions + "<br /><b>Originator: </b>" 
+	    				"<br /><b>Time issued: </b>" + timeissued + " UTC<br /><b>Expires at: </b>" + 
+	    				purgetime + " UTC<br /><b>Regions affected: </b>" + regions + "<br /><b>Originator: </b>" 
 	    				+ org + "<br /><b>Callsign: </b>" + callsign + "<br /></p>\n";
 	    		mText.append(Html.fromHtml(htmlText));
 	    		easmsg.moveToNext();
@@ -221,8 +221,8 @@ public class MainActivity extends Activity {
 					color = "GREEN";
 				}
 	    		String htmlText = "<p><b><font color=" + color + ">" + level + "</font></b>" + "<br />" + desc + 
-	    				"<br /><b>Time issued: </b>" + timeissued + "<br /><b>Expires at: </b>" + 
-	    				purgetime + "<br /><b>Regions affected: </b>" + regions + "<br /><b>Originator: </b>" 
+	    				"<br /><b>Time issued: </b>" + timeissued + " UTC<br /><b>Expires at: </b>" + 
+	    				purgetime + " UTC<br /><b>Regions affected: </b>" + regions + "<br /><b>Originator: </b>" 
 	    				+ org + "<br /><b>Callsign: </b>" + callsign + "<br /></p>\n";
 	    		mText.append(Html.fromHtml(htmlText));
 	    		easmsg.moveToNext();
@@ -536,16 +536,12 @@ public class MainActivity extends Activity {
         					if( events != null && events.moveToFirst() ){
         						eventlevel = events.getString(events.getColumnIndex("eventlevel"));
         						if("Test".equals(eventlevel)){
-        							notificationID = 1;
         							color = "WHITE";
         						}else if("Warning".equals(eventlevel)){
-        							notificationID = 2;
         							color = "RED";
         						}else if("Watch".equals(eventlevel)){
-        							notificationID = 3;
         							color = "YELLOW";
         						}else if("Advisory".equals(eventlevel)){
-        							notificationID = 4;
         							color = "GREEN";
         						}
         						eventdesc = events.getString(events.getColumnIndex("eventdesc"));
@@ -672,8 +668,8 @@ public class MainActivity extends Activity {
         					
         					// Display event
         					String htmlText = "<p><b><font color=" + color + ">" + eventlevel + "</font></b><br />" + eventdesc + 
-        			    			"</b><br /><b>Time issued(UTC): </b>" + issuedate + "<br /><b>Expires at(UTC): </b>" + 
-        			    			expdate + "<br /><b>Regions affected: </b>" + regions.toString() + "<br /><b>Originator: </b>" 
+        			    			"</b><br /><b>Time issued: </b>" + issuedate + " UTC<br /><b>Expires at: </b>" + 
+        			    			expdate + " UTC<br /><b>Regions affected: </b>" + regions.toString() + "<br /><b>Originator: </b>" 
         				    				+ org + "<br /><b>Callsign: </b>" + callSign + "<br /></p>\n";
         			    	mText.append(Html.fromHtml(htmlText));
         					
@@ -681,7 +677,9 @@ public class MainActivity extends Activity {
         					easdb.addEasMsg (new EasMsg(org, eventdesc, eventlevel, curdate, issuedate, callSign, expdate, regions.toString(), sharedPrefs.getString("prefDefaultCountry", "0")));
         					
         					// Send a notification
-        					Notify("EAS " + eventlevel + " from " + callSign,
+    						notificationID = 1;
+    						Log.d(TAG, "notificationID: " + notificationID);
+        					Notify(eventlevel + " from " + callSign,
         							eventdesc + " was issued", notificationID);
         					
         					// Tell widget to update
@@ -691,7 +689,7 @@ public class MainActivity extends Activity {
         					}
         		    } else if (currentLine.contains("No supported devices found")) {
         		    	// Log command output
-                        Log.d(TAG, "Output: " + currentLine + "\n");
+                        Log.d(TAG, "Output: " + currentLine);
                         // Send toast
         		    	Toast.makeText(MainActivity.this,
             					"No supported device found!",
@@ -701,7 +699,7 @@ public class MainActivity extends Activity {
         		    	// Drop this message      		    	
         		    } else {
                     	// Log command output
-                        Log.d(TAG, "Output: " + currentLine + "\n");
+                        Log.d(TAG, "Output: " + currentLine);
         		    }
         		    
                     
