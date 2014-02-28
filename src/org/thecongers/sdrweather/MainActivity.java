@@ -46,6 +46,7 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.text.Html;
 import android.text.method.ScrollingMovementMethod;
 
 import com.stericson.RootTools.*;
@@ -120,13 +121,6 @@ public class MainActivity extends Activity {
         }
         mText = (TextView) findViewById(R.id.TextView02);
         mText.setMovementMethod(new ScrollingMovementMethod());
-        evLvlText = (TextView) findViewById(R.id.textView7);
-        evDescText = (TextView) findViewById(R.id.textView8);
-        regionsText = (TextView) findViewById(R.id.textView9);
-        orgText = (TextView) findViewById(R.id.textView1);
-        purgeTimeText = (TextView) findViewById(R.id.textView4);
-        issueTimeText = (TextView) findViewById(R.id.textView5);
-        callsignText = (TextView) findViewById(R.id.textView6);
         startButton = (Button) findViewById(R.id.button1);
         stopButton = (Button) findViewById(R.id.button2);
         // Disable stop button
@@ -140,24 +134,24 @@ public class MainActivity extends Activity {
         // Show last currently active event if available
         Cursor easmsg = easdb.getActiveEvent();  
 	    if( easmsg != null && easmsg.moveToFirst() ){
-	    	Log.d(TAG, "Trying to display an event!");
-	    	String level = easmsg.getString(easmsg.getColumnIndex("level"));
-	    	evLvlText.setText(level);
-	    	if("Test".equals(level)){
-				evLvlText.setBackgroundResource(R.color.white);
-			}else if("Warning".equals(level)){
-				evLvlText.setBackgroundResource(R.color.red);
-			}else if("Watch".equals(level)){
-				evLvlText.setBackgroundResource(R.color.yellow);
-			}else if("Advisory".equals(level)){
-				evLvlText.setBackgroundResource(R.color.green);
-			}
-	    	evDescText.setText(easmsg.getString(easmsg.getColumnIndex("desc")));
-	    	regionsText.setText("Regions Affected: " + easmsg.getString(easmsg.getColumnIndex("regions")));
-	    	orgText.setText("Originator Code: " + easmsg.getString(easmsg.getColumnIndex("org")));
-	    	purgeTimeText.setText("Expires at: " + easmsg.getString(easmsg.getColumnIndex("purgetime")));
-	    	issueTimeText.setText("Issue Time: " + easmsg.getString(easmsg.getColumnIndex("timeissued")));
-	    	callsignText.setText("Call Sign: " + easmsg.getString(easmsg.getColumnIndex("callsign")));
+	    	while (easmsg.isAfterLast() == false) 
+	    	{
+	    		Log.d(TAG, "Trying to display an event!");
+	    		String level = easmsg.getString(easmsg.getColumnIndex("level"));
+	    		String desc = easmsg.getString(easmsg.getColumnIndex("desc"));
+	    		String regions = easmsg.getString(easmsg.getColumnIndex("regions"));
+	    		//String org = easmsg.getString(easmsg.getColumnIndex("org"));
+	    		String purgetime = easmsg.getString(easmsg.getColumnIndex("purgetime"));
+	    		String timeissued = easmsg.getString(easmsg.getColumnIndex("timeissued"));
+	    		//String callsign = easmsg.getString(easmsg.getColumnIndex("callsign"));
+	    		
+	    		String htmlText = "<p><h3>" + level + "</h3>" + "<b>" + desc + 
+	    				"</b><br /><b>Time issued: </b>" + timeissued + "<br /><b>Expires at: </b>" + 
+	    				purgetime + "<br /><b>Regions affected: </b>" + regions + "<br /></p>";
+	    	
+	    		mText.append(Html.fromHtml(htmlText));
+	    		easmsg.moveToNext();
+	    	}
 	    }
         
         // Get data root
@@ -192,33 +186,28 @@ public class MainActivity extends Activity {
         super.onResume();
         // Update display with latest active event in the database
         easdb = new EasDatabase(this);
-        Cursor easmsg = easdb.getActiveEvent();  
+        Cursor easmsg = easdb.getActiveEvent();
+        mText.setText("");
 	    if( easmsg != null && easmsg.moveToFirst() ){
-	    	evLvlText = (TextView) findViewById(R.id.textView7);
-	        evDescText = (TextView) findViewById(R.id.textView8);
-	        regionsText = (TextView) findViewById(R.id.textView9);
-	        orgText = (TextView) findViewById(R.id.textView1);
-	        purgeTimeText = (TextView) findViewById(R.id.textView4);
-	        issueTimeText = (TextView) findViewById(R.id.textView5);
-	        callsignText = (TextView) findViewById(R.id.textView6);
-	    	String level = easmsg.getString(easmsg.getColumnIndex("level"));
-	    	// Show last currently active event if available
-	    	evLvlText.setText(level);
-	    	if("Test".equals(level)){
-				evLvlText.setBackgroundResource(R.color.white);
-			}else if("Warning".equals(level)){
-				evLvlText.setBackgroundResource(R.color.red);
-			}else if("Watch".equals(level)){
-				evLvlText.setBackgroundResource(R.color.yellow);
-			}else if("Advisory".equals(level)){
-				evLvlText.setBackgroundResource(R.color.green);
-			}
-	    	evDescText.setText(easmsg.getString(easmsg.getColumnIndex("desc")));
-	    	regionsText.setText("Regions Affected: " + easmsg.getString(easmsg.getColumnIndex("regions")));
-	    	orgText.setText("Originator Code: " + easmsg.getString(easmsg.getColumnIndex("org")));
-	    	purgeTimeText.setText("Expires at: " + easmsg.getString(easmsg.getColumnIndex("purgetime")));
-	    	issueTimeText.setText("Issue Time: " + easmsg.getString(easmsg.getColumnIndex("timeissued")));
-	    	callsignText.setText("Call Sign: " + easmsg.getString(easmsg.getColumnIndex("callsign")));
+	    	while (easmsg.isAfterLast() == false) 
+	    	{
+	    		Log.d(TAG, "Trying to display an event!");
+	    		String level = easmsg.getString(easmsg.getColumnIndex("level"));
+	    		String desc = easmsg.getString(easmsg.getColumnIndex("desc"));
+	    		String regions = easmsg.getString(easmsg.getColumnIndex("regions"));
+	    		//String org = easmsg.getString(easmsg.getColumnIndex("org"));
+	    		String purgetime = easmsg.getString(easmsg.getColumnIndex("purgetime"));
+	    		String timeissued = easmsg.getString(easmsg.getColumnIndex("timeissued"));
+	    		//String callsign = easmsg.getString(easmsg.getColumnIndex("callsign"));
+	    		
+	    		String htmlText = "<p><h3>" + level + "</h3>" + "<b>" + desc + 
+	    				"</b><br /><b>Time issued: </b>" + timeissued + "<br /><b>Expires at: </b>" + 
+	    				purgetime + "<br /><b>Regions affected: </b>" + regions + "<br /></p>";
+	    	
+	    		mText.append(Html.fromHtml(htmlText));
+	    		easmsg.moveToNext();
+	    	}
+	    	
 	    }
     }
 
@@ -302,7 +291,6 @@ public class MainActivity extends Activity {
             	try {
 					audioStream.read(audioData, 0, audioData.length);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
             	m_audioTrack.write(audioData, 0, audioData.length); 
@@ -516,7 +504,6 @@ public class MainActivity extends Activity {
         					 */
         					org = easMsg[1];
         					Log.d(TAG, "Originator Code: " + org);
-        					orgText.setText("Originator Code: " + org);
         					
         					/*
         					 * EEE Ñ Event code; programmed at time of event
@@ -527,23 +514,17 @@ public class MainActivity extends Activity {
         					events = eventdb.getEventInfo(eee);
         					if( events != null && events.moveToFirst() ){
         						eventlevel = events.getString(events.getColumnIndex("eventlevel"));
-        						evLvlText.setText(eventlevel);
-        						// Set TextView background color to represent event level
         						if("Test".equals(eventlevel)){
-        							evLvlText.setBackgroundResource(R.color.white);
         							notificationID = 1;
         						}else if("Warning".equals(eventlevel)){
-        							evLvlText.setBackgroundResource(R.color.red);
         							notificationID = 2;
         						}else if("Watch".equals(eventlevel)){
-        							evLvlText.setBackgroundResource(R.color.yellow);
         							notificationID = 3;
         						}else if("Advisory".equals(eventlevel)){
-        							evLvlText.setBackgroundResource(R.color.green);
         							notificationID = 4;
         						}
         						eventdesc = events.getString(events.getColumnIndex("eventdesc"));
-        						evDescText.setText("Event: " + eventdesc);
+        						
         					}
         					
         					/*
@@ -559,8 +540,7 @@ public class MainActivity extends Activity {
         					easMsg[size - 3] = temp[0];
         					int j=0;
         					String [] locationCodes = new String[size - 5];
-        					
-        					regionsText.setText("Regions Affected: ");
+
         					StringBuilder regions = new StringBuilder("");
         					
         					// Get country from preferences and look up region codes from appropriate database
@@ -576,7 +556,6 @@ public class MainActivity extends Activity {
         							fips = fipsdb.getCountyState(fipscode);
         							if( fips != null && fips.moveToFirst() ){
         								Log.d(TAG, "Location: " + fips.getString(fips.getColumnIndex("county")) + ", " + fips.getString(fips.getColumnIndex("state")));
-        								regionsText.append(fips.getString(fips.getColumnIndex("county")) + ", " + fips.getString(fips.getColumnIndex("state")) + "; ");
         								regions.append(fips.getString(fips.getColumnIndex("county")) + "+" + fips.getString(fips.getColumnIndex("state")) + ":");
         							}
         							j++;
@@ -592,7 +571,6 @@ public class MainActivity extends Activity {
         							clc = clcdb.getCountyState(clccode);
         							if( clc != null && clc.moveToFirst() ){
         								Log.d(TAG, "Location: " + clc.getString(clc.getColumnIndex("region")) + ", " + clc.getString(clc.getColumnIndex("provinceterritory")));
-        								regionsText.append(clc.getString(clc.getColumnIndex("region")) + ", " + clc.getString(clc.getColumnIndex("provinceterritory")) + "; ");
         								regions.append(clc.getString(clc.getColumnIndex("region")) + "+" + clc.getString(clc.getColumnIndex("provinceterritory")) + ":");
         							}
         							j++;
@@ -632,7 +610,6 @@ public class MainActivity extends Activity {
         					defaultFormat.setTimeZone(TimeZone.getDefault());
         					localTimeOfIssue = defaultFormat.format(date);
         					Log.d(TAG, "Time of issue (Local): " + localTimeOfIssue);
-        					issueTimeText.setText("Time of issue: " + localTimeOfIssue);
         					
         					// Get current date/time
         					Calendar cal = Calendar.getInstance();
@@ -659,8 +636,6 @@ public class MainActivity extends Activity {
         					formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         					String expdate = formatter.format(edate);
         					Log.d(TAG, "Expires at (UTC): " + expdate);
-        					// TODO covert to local time
-        					purgeTimeText.setText("Expires at:" + expdate);
         				
         					/*
         					 * LLLLLLLL Ñ Eight-character station callsign identification, with "/" used instead of "Ð" (such as the first eight
@@ -669,7 +644,12 @@ public class MainActivity extends Activity {
         					 */
         					callSign = easMsg[size - 1];
         					Log.d(TAG, "Call Sign: " + callSign);
-        					callsignText.setText("Call Sign: " + callSign);
+        					
+        					// Display event
+        					String htmlText = "<p><h3>" + eventlevel + "</h3>" + "<b>" + eventdesc + 
+        			    			"</b><br /><b>Time issued(UTC): </b>" + issuedate + "<br /><b>Expires at(UTC): </b>" + 
+        			    			expdate + "<br /><b>Regions affected: </b>" + regions.toString() + "<br /></p>";      			    	
+        			    	mText.append(Html.fromHtml(htmlText));
         					
         					//Update EAS event database
         					easdb.addEasMsg (new EasMsg(org, eventdesc, eventlevel, curdate, issuedate, callSign, expdate, regions.toString(), sharedPrefs.getString("prefDefaultCountry", "0")));
@@ -684,20 +664,18 @@ public class MainActivity extends Activity {
         				
         					}
         		    } else if (currentLine.contains("No supported devices found")) {
-        		    	// Display command output
-                        mText.append(currentLine + "\n");
+        		    	// Log command output
+                        Log.d(TAG, "Output: " + currentLine + "\n");
                         // Send toast
         		    	Toast.makeText(MainActivity.this,
             					"No supported device found!",
             					Toast.LENGTH_LONG).show();
         		    	stopButton.performClick();
         		    } else if (currentLine.contains("warning: noninteger number of samples read")) {
-        		    	// Drop this message 
-        		    	
+        		    	// Drop this message      		    	
         		    } else {
-                    	// Display command output
-                        mText.append(currentLine + "\n");
-                        Log.d(TAG, "Output: " + currentLine);
+                    	// Log command output
+                        Log.d(TAG, "Output: " + currentLine + "\n");
         		    }
         		    
                     
