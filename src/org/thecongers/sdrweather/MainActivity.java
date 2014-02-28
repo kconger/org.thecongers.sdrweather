@@ -133,22 +133,32 @@ public class MainActivity extends Activity {
         
         // Show last currently active event if available
         Cursor easmsg = easdb.getActiveEvent();  
+        Log.d(TAG, "Lookup active events");
 	    if( easmsg != null && easmsg.moveToFirst() ){
 	    	while (easmsg.isAfterLast() == false) 
 	    	{
-	    		Log.d(TAG, "Trying to display an event!");
+	    		Log.d(TAG, "Found an event!");
+	    		String color = null;
 	    		String level = easmsg.getString(easmsg.getColumnIndex("level"));
 	    		String desc = easmsg.getString(easmsg.getColumnIndex("desc"));
 	    		String regions = easmsg.getString(easmsg.getColumnIndex("regions"));
-	    		//String org = easmsg.getString(easmsg.getColumnIndex("org"));
+	    		String org = easmsg.getString(easmsg.getColumnIndex("org"));
 	    		String purgetime = easmsg.getString(easmsg.getColumnIndex("purgetime"));
 	    		String timeissued = easmsg.getString(easmsg.getColumnIndex("timeissued"));
-	    		//String callsign = easmsg.getString(easmsg.getColumnIndex("callsign"));
-	    		
-	    		String htmlText = "<p><h3>" + level + "</h3>" + "<b>" + desc + 
-	    				"</b><br /><b>Time issued: </b>" + timeissued + "<br /><b>Expires at: </b>" + 
-	    				purgetime + "<br /><b>Regions affected: </b>" + regions + "<br /></p>";
-	    	
+	    		String callsign = easmsg.getString(easmsg.getColumnIndex("callsign"));
+	    		if("Test".equals(level)){
+					color = "WHITE";
+				}else if("Warning".equals(level)){
+					color = "RED";
+				}else if("Watch".equals(level)){
+					color = "YELLOW";
+				}else if("Advisory".equals(level)){
+					color = "GREEN";
+				}
+	    		String htmlText = "<p><b><font color=" + color + ">" + level + "</font></b>" + "<br />" + desc + 
+	    				"<br /><b>Time issued: </b>" + timeissued + "<br /><b>Expires at: </b>" + 
+	    				purgetime + "<br /><b>Regions affected: </b>" + regions + "<br /><b>Originator: </b>" 
+	    				+ org + "<br /><b>Callsign: </b>" + callsign + "<br /></p>\n";
 	    		mText.append(Html.fromHtml(htmlText));
 	    		easmsg.moveToNext();
 	    	}
@@ -188,22 +198,32 @@ public class MainActivity extends Activity {
         easdb = new EasDatabase(this);
         Cursor easmsg = easdb.getActiveEvent();
         mText.setText("");
+        Log.d(TAG, "Lookup active events");
 	    if( easmsg != null && easmsg.moveToFirst() ){
 	    	while (easmsg.isAfterLast() == false) 
 	    	{
-	    		Log.d(TAG, "Trying to display an event!");
+	    		Log.d(TAG, "Found an event!");
+	    		String color = null;
 	    		String level = easmsg.getString(easmsg.getColumnIndex("level"));
 	    		String desc = easmsg.getString(easmsg.getColumnIndex("desc"));
 	    		String regions = easmsg.getString(easmsg.getColumnIndex("regions"));
-	    		//String org = easmsg.getString(easmsg.getColumnIndex("org"));
+	    		String org = easmsg.getString(easmsg.getColumnIndex("org"));
 	    		String purgetime = easmsg.getString(easmsg.getColumnIndex("purgetime"));
 	    		String timeissued = easmsg.getString(easmsg.getColumnIndex("timeissued"));
-	    		//String callsign = easmsg.getString(easmsg.getColumnIndex("callsign"));
-	    		
-	    		String htmlText = "<p><h3>" + level + "</h3>" + "<b>" + desc + 
-	    				"</b><br /><b>Time issued: </b>" + timeissued + "<br /><b>Expires at: </b>" + 
-	    				purgetime + "<br /><b>Regions affected: </b>" + regions + "<br /></p>";
-	    	
+	    		String callsign = easmsg.getString(easmsg.getColumnIndex("callsign"));
+	    		if("Test".equals(level)){
+					color = "WHITE";
+				}else if("Warning".equals(level)){
+					color = "RED";
+				}else if("Watch".equals(level)){
+					color = "YELLOW";
+				}else if("Advisory".equals(level)){
+					color = "GREEN";
+				}
+	    		String htmlText = "<p><b><font color=" + color + ">" + level + "</font></b>" + "<br />" + desc + 
+	    				"<br /><b>Time issued: </b>" + timeissued + "<br /><b>Expires at: </b>" + 
+	    				purgetime + "<br /><b>Regions affected: </b>" + regions + "<br /><b>Originator: </b>" 
+	    				+ org + "<br /><b>Callsign: </b>" + callsign + "<br /></p>\n";
 	    		mText.append(Html.fromHtml(htmlText));
 	    		easmsg.moveToNext();
 	    	}
@@ -473,8 +493,8 @@ public class MainActivity extends Activity {
                 	String currentLine = mReader.readLine();
                     // Check for alert
                     if (currentLine.contains("EAS:")) {
-                    	// Display command output
-                        mText.append(currentLine + "\n");
+                    	// Log command output
+                        Log.d(TAG, "Output: " + currentLine + "\n");
                         
         				Log.d(TAG, "Found EAS Alert, parsing.....");
         				String org = null;
@@ -512,16 +532,21 @@ public class MainActivity extends Activity {
         					Log.d(TAG, "Event Code: " + eee);
         					//Look up event code in database, return level and description
         					events = eventdb.getEventInfo(eee);
+        					String color = null;
         					if( events != null && events.moveToFirst() ){
         						eventlevel = events.getString(events.getColumnIndex("eventlevel"));
         						if("Test".equals(eventlevel)){
         							notificationID = 1;
+        							color = "WHITE";
         						}else if("Warning".equals(eventlevel)){
         							notificationID = 2;
+        							color = "RED";
         						}else if("Watch".equals(eventlevel)){
         							notificationID = 3;
+        							color = "YELLOW";
         						}else if("Advisory".equals(eventlevel)){
         							notificationID = 4;
+        							color = "GREEN";
         						}
         						eventdesc = events.getString(events.getColumnIndex("eventdesc"));
         						
@@ -646,9 +671,10 @@ public class MainActivity extends Activity {
         					Log.d(TAG, "Call Sign: " + callSign);
         					
         					// Display event
-        					String htmlText = "<p><h3>" + eventlevel + "</h3>" + "<b>" + eventdesc + 
+        					String htmlText = "<p><b><font color=" + color + ">" + eventlevel + "</font></b><br />" + eventdesc + 
         			    			"</b><br /><b>Time issued(UTC): </b>" + issuedate + "<br /><b>Expires at(UTC): </b>" + 
-        			    			expdate + "<br /><b>Regions affected: </b>" + regions.toString() + "<br /></p>";      			    	
+        			    			expdate + "<br /><b>Regions affected: </b>" + regions.toString() + "<br /><b>Originator: </b>" 
+        				    				+ org + "<br /><b>Callsign: </b>" + callSign + "<br /></p>\n";
         			    	mText.append(Html.fromHtml(htmlText));
         					
         					//Update EAS event database
