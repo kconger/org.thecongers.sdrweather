@@ -129,6 +129,8 @@ public class MainActivity extends Activity {
         callsignText = (TextView) findViewById(R.id.textView6);
         startButton = (Button) findViewById(R.id.button1);
         stopButton = (Button) findViewById(R.id.button2);
+        // Disable stop button
+    	stopButton.setEnabled(false);
         
         // Set initial frequency from preferences
         spinner1 = (Spinner) findViewById(R.id.spinner1);
@@ -249,12 +251,18 @@ public class MainActivity extends Activity {
     		} else {
     			m_audioTrack.setStereoVolume(0.0f, 0.0f);
     		}
+    		// Disable start button
+    		startButton.setEnabled(false);
+    		// Enable stop button
+        	stopButton.setEnabled(true);
+        	// Disable frequency spinner
+        	spinner1.setEnabled(false);
     	} else {
     		// Display message about lack of root and or busybox
     		if (!RootTools.isRootAvailable()) {
     			Toast.makeText(MainActivity.this,
     					"Root Access Not Available!",
-    					Toast.LENGTH_SHORT).show();
+    					Toast.LENGTH_LONG).show();
     		} else if (!RootTools.isBusyboxAvailable()) {
     			// Offer busybox if not installed
     			RootTools.offerBusyBox(MainActivity.this);   			
@@ -268,6 +276,12 @@ public class MainActivity extends Activity {
     	Log.d(TAG, "Stop Pressed" );
     	audioStop();
     	mTask.stop();
+    	// Enable start button
+    	startButton.setEnabled(true);
+    	// Disable stop button
+    	stopButton.setEnabled(false);
+    	// Enable frequency spinner
+    	spinner1.setEnabled(true);
     }
     
     Runnable m_audioGenerator = new Runnable()
@@ -675,7 +689,7 @@ public class MainActivity extends Activity {
                         // Send toast
         		    	Toast.makeText(MainActivity.this,
             					"No supported device found!",
-            					Toast.LENGTH_SHORT).show();
+            					Toast.LENGTH_LONG).show();
         		    	stopButton.performClick();
         		    } else if (currentLine.contains("warning: noninteger number of samples read")) {
         		    	// Drop this message 
