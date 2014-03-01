@@ -25,12 +25,10 @@
             android:layout_height="wrap_content"
             android:orientation="vertical" >
 
-            <TextView
-                android:id="@+id/TextView02"
+            <WebView
+                android:id="@+id/webView1"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="bottom"
-                android:text="@string/output" />
+                android:layout_height="match_parent" /> 
         </LinearLayout>
     </ScrollView>
 

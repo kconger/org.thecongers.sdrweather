@@ -39,6 +39,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -46,8 +47,6 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.text.Html;
-import android.text.method.ScrollingMovementMethod;
 
 import com.stericson.RootTools.*;
 
@@ -71,7 +70,7 @@ public class MainActivity extends Activity {
     Button startButton;
     Button stopButton;
     Switch switch1;
-    TextView mText;
+    WebView activeEventsView;
     TextView evLvlText;
     TextView evDescText;
     TextView regionsText;
@@ -119,8 +118,10 @@ public class MainActivity extends Activity {
         } else {
         	switch1.setChecked(false);
         }
-        mText = (TextView) findViewById(R.id.TextView02);
-        mText.setMovementMethod(new ScrollingMovementMethod());
+        
+        activeEventsView = (WebView) findViewById(R.id.webView1); 
+        activeEventsView.loadData("<html><body>No active events</body></html>", "text/html", null);
+        
         startButton = (Button) findViewById(R.id.button1);
         stopButton = (Button) findViewById(R.id.button2);
         // Disable stop button
@@ -135,6 +136,11 @@ public class MainActivity extends Activity {
         Cursor easmsg = easdb.getActiveEvent();  
         Log.d(TAG, "Lookup active events");
 	    if( easmsg != null && easmsg.moveToFirst() ){
+	    	StringBuilder htmlText = new StringBuilder();
+	    	htmlText.append("<!DOCTYPE html><html>" +
+	    			"<head><style>div.box{padding:10px;border:3px solid gray;" +
+	    			"margin:0px;font-size:small;}div.level{padding:10px;border:3px solid gray;" +
+	    			"margin:0px;font-size:medium;}</style></head><body>");
 	    	while (easmsg.isAfterLast() == false) 
 	    	{
 	    		Log.d(TAG, "Found an event!");
@@ -155,13 +161,14 @@ public class MainActivity extends Activity {
 				}else if("Advisory".equals(level)){
 					color = "GREEN";
 				}
-	    		String htmlText = "<p><b><font color=" + color + ">" + level + "</font></b>" + "<br />" + desc + 
+	    		htmlText.append("<p><div class=\"box\"><div class=\"level\" style=\"background-color:" + color + ";\"><b>" + level + "</b>" + "</div>" + desc + 
 	    				"<br /><b>Time issued: </b>" + timeissued + " UTC<br /><b>Expires at: </b>" + 
 	    				purgetime + " UTC<br /><b>Regions affected: </b>" + regions + "<br /><b>Originator: </b>" 
-	    				+ org + "<br /><b>Callsign: </b>" + callsign + "<br /></p>\n";
-	    		mText.append(Html.fromHtml(htmlText));
+	    				+ org + "<br /><b>Callsign: </b>" + callsign + "<br /></div></p>");
 	    		easmsg.moveToNext();
 	    	}
+	    	htmlText.append("</body></html>");
+	    	activeEventsView.loadData(htmlText.toString(), "text/html", null);
 	    }
         
         // Get data root
@@ -197,9 +204,17 @@ public class MainActivity extends Activity {
         // Update display with latest active event in the database
         easdb = new EasDatabase(this);
         Cursor easmsg = easdb.getActiveEvent();
-        mText.setText("");
+        
+        activeEventsView.loadData("<html></html>", "text/html", null);
+        activeEventsView.loadData("<html><body>No active events</body></html>", "text/html", null);
+        
         Log.d(TAG, "Lookup active events");
-	    if( easmsg != null && easmsg.moveToFirst() ){
+        if( easmsg != null && easmsg.moveToFirst() ){
+	    	StringBuilder htmlText = new StringBuilder();
+	    	htmlText.append("<!DOCTYPE html><html>" +
+	    			"<head><style>div.box{padding:10px;border:3px solid gray;" +
+	    			"margin:0px;font-size:small;}div.level{padding:10px;border:3px solid gray;" +
+	    			"margin:0px;font-size:medium;}</style></head><body>");
 	    	while (easmsg.isAfterLast() == false) 
 	    	{
 	    		Log.d(TAG, "Found an event!");
@@ -220,14 +235,14 @@ public class MainActivity extends Activity {
 				}else if("Advisory".equals(level)){
 					color = "GREEN";
 				}
-	    		String htmlText = "<p><b><font color=" + color + ">" + level + "</font></b>" + "<br />" + desc + 
+	    		htmlText.append("<p><div class=\"box\"><div class=\"level\" style=\"background-color:" + color + ";\"><b>" + level + "</b>" + "</div>" + desc + 
 	    				"<br /><b>Time issued: </b>" + timeissued + " UTC<br /><b>Expires at: </b>" + 
 	    				purgetime + " UTC<br /><b>Regions affected: </b>" + regions + "<br /><b>Originator: </b>" 
-	    				+ org + "<br /><b>Callsign: </b>" + callsign + "<br /></p>\n";
-	    		mText.append(Html.fromHtml(htmlText));
+	    				+ org + "<br /><b>Callsign: </b>" + callsign + "<br /></div></p>");
 	    		easmsg.moveToNext();
 	    	}
-	    	
+	    	htmlText.append("</body></html>");
+	    	activeEventsView.loadData(htmlText.toString(), "text/html", null);
 	    }
     }
 
@@ -451,11 +466,11 @@ public class MainActivity extends Activity {
             	// Build command and execute
             	String dataRoot = getApplicationContext().getFilesDir().getParentFile().getPath();
             	//Test wave
-            	String[] cmd = { "/system/xbin/su", "-c", "cat " + dataRoot + "/nativeFolder/eas-test.raw | tee " + dataRoot + "/pipe | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
+            	//String[] cmd = { "/system/xbin/su", "-c", "cat " + dataRoot + "/nativeFolder/eas-test.raw | tee " + dataRoot + "/pipe | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
             	// No audio just alert monitoring
             	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -f " + params[0] + "M -s 22050 -g " + params[1]  + " -l " + params[2] + " | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
             	// Audio and alert monitoring
-            	//String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -f " + params[0] + "M -s 22050 -g " + params[1] + " -l " + params[2] + " | tee " + dataRoot + "/pipe | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
+            	String[] cmd = { "/system/xbin/su", "-c", dataRoot + "/nativeFolder/rtl_fm -f " + params[0] + "M -s 22050 -g " + params[1] + " -l " + params[2] + " | tee " + dataRoot + "/pipe | " + dataRoot + "/nativeFolder/multimon-ng -a EAS -q -t raw -" };
                 mProcess = new ProcessBuilder()
                     .command(cmd)
                     .redirectErrorStream(true)
@@ -666,16 +681,50 @@ public class MainActivity extends Activity {
         					callSign = easMsg[size - 1];
         					Log.d(TAG, "Call Sign: " + callSign);
         					
-        					// Display event
-        					String htmlText = "<p><b><font color=" + color + ">" + eventlevel + "</font></b><br />" + eventdesc + 
-        			    			"</b><br /><b>Time issued: </b>" + issuedate + " UTC<br /><b>Expires at: </b>" + 
-        			    			expdate + " UTC<br /><b>Regions affected: </b>" + regions.toString() + "<br /><b>Originator: </b>" 
-        				    				+ org + "<br /><b>Callsign: </b>" + callSign + "<br /></p>\n";
-        			    	mText.append(Html.fromHtml(htmlText));
-        					
         					//Update EAS event database
         					easdb.addEasMsg (new EasMsg(org, eventdesc, eventlevel, curdate, issuedate, callSign, expdate, regions.toString(), sharedPrefs.getString("prefDefaultCountry", "0")));
         					
+        					// Update active events list in app
+        					Cursor easmsg = easdb.getActiveEvent();
+        			        Log.d(TAG, "Lookup active events");
+        				    if( easmsg != null && easmsg.moveToFirst() ){
+        				    	StringBuilder
+        				    	htmlText = new StringBuilder();
+        				    	htmlText.append("<!DOCTYPE html><html>" +
+        				    			"<head><style>div.box{padding:10px;border:3px solid gray;" +
+        				    			"margin:0px;font-size:small;}div.level{padding:10px;border:3px solid gray;" +
+        				    			"margin:0px;font-size:medium;}</style></head><body>");
+        				    	while (easmsg.isAfterLast() == false) 
+        				    	{
+        				    		Log.d(TAG, "Found an event!");
+        				    		color = null;
+        				    		String level = easmsg.getString(easmsg.getColumnIndex("level"));
+        				    		String desc = easmsg.getString(easmsg.getColumnIndex("desc"));
+        				    		String evregions = easmsg.getString(easmsg.getColumnIndex("regions"));
+        				    		org = easmsg.getString(easmsg.getColumnIndex("org"));
+        				    		String purgetime = easmsg.getString(easmsg.getColumnIndex("purgetime"));
+        				    		String timeissued = easmsg.getString(easmsg.getColumnIndex("timeissued"));
+        				    		String callsign = easmsg.getString(easmsg.getColumnIndex("callsign"));
+        				    		if("Test".equals(level)){
+        								color = "WHITE";
+        							}else if("Warning".equals(level)){
+        								color = "RED";
+        							}else if("Watch".equals(level)){
+        								color = "YELLOW";
+        							}else if("Advisory".equals(level)){
+        								color = "GREEN";
+        							}
+        				    		htmlText.append("<p><div class=\"box\"><div class=\"level\" style=\"background-color:" + color + ";\"><b>" + level + "</b>" + "</div>" + desc + 
+        				    				"<br /><b>Time issued: </b>" + timeissued + " UTC<br /><b>Expires at: </b>" + 
+        				    				purgetime + " UTC<br /><b>Regions affected: </b>" + evregions + "<br /><b>Originator: </b>" 
+        				    				+ org + "<br /><b>Callsign: </b>" + callsign + "<br /></div></p>");
+        				    		easmsg.moveToNext();
+        				    	}
+        				    	htmlText.append("</body></html>");
+        				    	activeEventsView.loadData(htmlText.toString(), "text/html", null);
+        				    	
+        				    }
+        				    
         					// Send a notification
     						notificationID = 1;
     						Log.d(TAG, "notificationID: " + notificationID);
