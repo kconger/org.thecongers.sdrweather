@@ -51,7 +51,7 @@ import android.widget.Toast;
 import com.stericson.RootTools.*;
 
 public class MainActivity extends Activity {
-    RtlTask mTask;
+    RtlTask nativeTask;
     private static final String TAG = "SDRWeather";
     private Cursor events;
     private Cursor fips;
@@ -60,16 +60,17 @@ public class MainActivity extends Activity {
     private FipsDatabase fipsdb;
     private ClcDatabase clcdb;
     EasDatabase easdb;
-    private Spinner spinner1;
+    private Spinner freqSpinner;
     private SharedPreferences sharedPrefs;
     private static final int SETTINGS_RESULT = 1;
     private String dataRoot;
-    boolean m_stop = false;
-    AudioTrack m_audioTrack;
-    Thread m_audioThread;
+    boolean stopAudioRead = false;
+    boolean dongleUnplugged = false;
+    AudioTrack audioTrack;
+    Thread audioThread;
     Button startButton;
     Button stopButton;
-    Switch switch1;
+    Switch audioSwitch;
     WebView activeEventsView;
     TextView evLvlText;
     TextView evDescText;
@@ -79,6 +80,11 @@ public class MainActivity extends Activity {
     TextView issueTimeText;
     TextView callsignText;
     int minBuffSize;
+    // Controls the look of events in the app
+    String eventLook = "<!DOCTYPE html><html><head><style>" + 
+    		"div.box{padding:5px;border:3px solid gray;margin:0px;font-size:x-small;}" + 
+    		"div.level{padding:5px;border:3px solid gray;margin:0px;font-size:small;}" + 
+    		"</style></head><body>";
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -95,18 +101,18 @@ public class MainActivity extends Activity {
         easdb.purgeExpiredMsg();
         
         // Audio switch setup
-        switch1 = (Switch) findViewById(R.id.switch1);
-        switch1.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+        audioSwitch = (Switch) findViewById(R.id.switch1);
+        audioSwitch.setOnCheckedChangeListener(new OnCheckedChangeListener() {
         	@Override
         	public void onCheckedChanged(CompoundButton buttonView,
         	boolean isChecked) {
-        		if ( m_audioTrack != null ) {
+        		if ( audioTrack != null ) {
         			if (isChecked) {
         				Log.d(TAG, "Audio is set to on" );
-        				m_audioTrack.setStereoVolume(1.0f, 1.0f);
+        				audioTrack.setStereoVolume(1.0f, 1.0f);
         			} else {
         				Log.d(TAG, "Audio is set to off" );
-        				m_audioTrack.setStereoVolume(0.0f, 0.0f);
+        				audioTrack.setStereoVolume(0.0f, 0.0f);
         			}
         		}
         		}
@@ -114,9 +120,9 @@ public class MainActivity extends Activity {
         
         // Set initial audio switch from preferences
         if (sharedPrefs.getBoolean("prefStartAudio", true)) {
-        	switch1.setChecked(true);
+        	audioSwitch.setChecked(true);
         } else {
-        	switch1.setChecked(false);
+        	audioSwitch.setChecked(false);
         }
         
         activeEventsView = (WebView) findViewById(R.id.webView1); 
@@ -128,19 +134,16 @@ public class MainActivity extends Activity {
     	stopButton.setEnabled(false);
         
         // Set initial frequency from preferences
-        spinner1 = (Spinner) findViewById(R.id.spinner1);
+    	freqSpinner = (Spinner) findViewById(R.id.spinner1);
         int freq = Integer.parseInt(sharedPrefs.getString("prefDefaultFreq", "6"));
-        spinner1.setSelection(freq);
+        freqSpinner.setSelection(freq);
         
         // Show last currently active event if available
         Cursor easmsg = easdb.getActiveEvent();  
         Log.d(TAG, "Lookup active events");
 	    if( easmsg != null && easmsg.moveToFirst() ){
 	    	StringBuilder htmlText = new StringBuilder();
-	    	htmlText.append("<!DOCTYPE html><html>" +
-	    			"<head><style>div.box{padding:10px;border:3px solid gray;" +
-	    			"margin:0px;font-size:small;}div.level{padding:10px;border:3px solid gray;" +
-	    			"margin:0px;font-size:medium;}</style></head><body>");
+	    	htmlText.append(eventLook);
 	    	while (easmsg.isAfterLast() == false) 
 	    	{
 	    		Log.d(TAG, "Found an event!");
@@ -211,10 +214,7 @@ public class MainActivity extends Activity {
         Log.d(TAG, "Lookup active events");
         if( easmsg != null && easmsg.moveToFirst() ){
 	    	StringBuilder htmlText = new StringBuilder();
-	    	htmlText.append("<!DOCTYPE html><html>" +
-	    			"<head><style>div.box{padding:10px;border:3px solid gray;" +
-	    			"margin:0px;font-size:small;}div.level{padding:10px;border:3px solid gray;" +
-	    			"margin:0px;font-size:medium;}</style></head><body>");
+	    	htmlText.append(eventLook);
 	    	while (easmsg.isAfterLast() == false) 
 	    	{
 	    		Log.d(TAG, "Found an event!");
@@ -259,28 +259,29 @@ public class MainActivity extends Activity {
     public void onClickStart(View view)
     {
     	Log.d(TAG, "Start Pressed" );
+    	dongleUnplugged = false;
     	if (RootTools.isRootAvailable() && RootTools.isBusyboxAvailable()) {
     		// Get Frequency and gain from preferences
-    		String freq = String.valueOf(spinner1.getSelectedItem());
+    		String freq = String.valueOf(freqSpinner.getSelectedItem());
     		String gain = sharedPrefs.getString("prefGain", "42");
     		String squelch = sharedPrefs.getString("prefSqel", "0");
     		// Call for process to start
-    		mTask = new RtlTask();
-    		mTask.execute(freq,gain,squelch);
+    		nativeTask = new RtlTask();
+    		nativeTask.execute(freq,gain,squelch);
     		// Start audio
     		audioStart();
     		// Check for mute status and set
-    		if (switch1.isChecked()) {
-    			m_audioTrack.setStereoVolume(1.0f, 1.0f);
+    		if (audioSwitch.isChecked()) {
+    			audioTrack.setStereoVolume(1.0f, 1.0f);
     		} else {
-    			m_audioTrack.setStereoVolume(0.0f, 0.0f);
+    			audioTrack.setStereoVolume(0.0f, 0.0f);
     		}
     		// Disable start button
     		startButton.setEnabled(false);
     		// Enable stop button
         	stopButton.setEnabled(true);
         	// Disable frequency spinner
-        	spinner1.setEnabled(false);
+        	freqSpinner.setEnabled(false);
     	} else {
     		// Display message about lack of root and or busybox
     		if (!RootTools.isRootAvailable()) {
@@ -299,13 +300,13 @@ public class MainActivity extends Activity {
     {
     	Log.d(TAG, "Stop Pressed" );
     	audioStop();
-    	mTask.stop();
+    	nativeTask.stop();
     	// Enable start button
     	startButton.setEnabled(true);
     	// Disable stop button
     	stopButton.setEnabled(false);
     	// Enable frequency spinner
-    	spinner1.setEnabled(true);
+    	freqSpinner.setEnabled(true);
     }
     
     Runnable m_audioGenerator = new Runnable()
@@ -321,14 +322,14 @@ public class MainActivity extends Activity {
             	Log.d(TAG, "Named Pipe Not Found" );
             }
             byte [] audioData = new byte[minBuffSize/2]; 
-            Log.d(TAG, "Write Audio Out" );
-            while(!m_stop) {
+            Log.d(TAG, "Read audio from named pipe" );
+            while(!stopAudioRead) {
             	try {
 					audioStream.read(audioData, 0, audioData.length);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-            	m_audioTrack.write(audioData, 0, audioData.length); 
+            	audioTrack.write(audioData, 0, audioData.length); 
             }
         }
     };
@@ -336,23 +337,23 @@ public class MainActivity extends Activity {
     // Start audio
     void audioStart()
     {
-        m_stop = false;
+    	stopAudioRead = false;
         // Get buffer size
         minBuffSize = AudioTrack.getMinBufferSize(22050, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
         
         // Setup AudioTrack settings
-        m_audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 22050, AudioFormat.CHANNEL_OUT_MONO,
+        audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 22050, AudioFormat.CHANNEL_OUT_MONO,
                                         AudioFormat.ENCODING_PCM_16BIT, minBuffSize, AudioTrack.MODE_STREAM);
-        m_audioTrack.play();
-        m_audioThread = new Thread(m_audioGenerator);
-        m_audioThread.start();
+        audioTrack.play();
+        audioThread = new Thread(m_audioGenerator);
+        audioThread.start();
     }
 
     // Stop audio
     void audioStop()
     {
-        m_stop = true;
-        m_audioTrack.stop();
+    	stopAudioRead = true;
+        audioTrack.stop();
     }   
 
     // Draw options menu
@@ -396,13 +397,7 @@ public class MainActivity extends Activity {
     {
     	// Update frequency selector
     	int freq = Integer.parseInt(sharedPrefs.getString("prefDefaultFreq", "6"));
-        spinner1.setSelection(freq);
-        // Update audio switch
-        if (sharedPrefs.getBoolean("prefStartAudio", true)) {
-        	switch1.setChecked(true);
-        } else {
-         	switch1.setChecked(false);
-        }
+    	freqSpinner.setSelection(freq);
      }
     
     // Send Notification
@@ -512,6 +507,15 @@ public class MainActivity extends Activity {
                         Log.d(TAG, "Output: " + currentLine + "\n");
                         
         				Log.d(TAG, "Found EAS Alert, parsing.....");
+        				
+        				// Unumute audio if configured
+        		        if (sharedPrefs.getBoolean("prefStartAudio", true)) {
+        		        	// Update audio switch
+        		        	audioSwitch.setChecked(true);
+        		        	// Unmute Audio
+        		        	audioTrack.setStereoVolume(1.0f, 1.0f);
+        		        }
+        		        
         				String org = null;
         				String eventlevel = null;
         				String eventdesc = null;
@@ -560,7 +564,6 @@ public class MainActivity extends Activity {
         							color = "GREEN";
         						}
         						eventdesc = events.getString(events.getColumnIndex("eventdesc"));
-        						
         					}
         					
         					/*
@@ -592,7 +595,7 @@ public class MainActivity extends Activity {
         							fips = fipsdb.getCountyState(fipscode);
         							if( fips != null && fips.moveToFirst() ){
         								Log.d(TAG, "Location: " + fips.getString(fips.getColumnIndex("county")) + ", " + fips.getString(fips.getColumnIndex("state")));
-        								regions.append(fips.getString(fips.getColumnIndex("county")) + "+" + fips.getString(fips.getColumnIndex("state")) + ":");
+        								regions.append(fips.getString(fips.getColumnIndex("county")) + "," + fips.getString(fips.getColumnIndex("state")) + ";");
         							}
         							j++;
         						}
@@ -607,7 +610,7 @@ public class MainActivity extends Activity {
         							clc = clcdb.getCountyState(clccode);
         							if( clc != null && clc.moveToFirst() ){
         								Log.d(TAG, "Location: " + clc.getString(clc.getColumnIndex("region")) + ", " + clc.getString(clc.getColumnIndex("provinceterritory")));
-        								regions.append(clc.getString(clc.getColumnIndex("region")) + "+" + clc.getString(clc.getColumnIndex("provinceterritory")) + ":");
+        								regions.append(clc.getString(clc.getColumnIndex("region")) + "," + clc.getString(clc.getColumnIndex("provinceterritory")) + ";");
         							}
         							j++;
         						}
@@ -690,10 +693,7 @@ public class MainActivity extends Activity {
         				    if( easmsg != null && easmsg.moveToFirst() ){
         				    	StringBuilder
         				    	htmlText = new StringBuilder();
-        				    	htmlText.append("<!DOCTYPE html><html>" +
-        				    			"<head><style>div.box{padding:10px;border:3px solid gray;" +
-        				    			"margin:0px;font-size:small;}div.level{padding:10px;border:3px solid gray;" +
-        				    			"margin:0px;font-size:medium;}</style></head><body>");
+        				    	htmlText.append(eventLook);
         				    	while (easmsg.isAfterLast() == false) 
         				    	{
         				    		Log.d(TAG, "Found an event!");
@@ -714,10 +714,9 @@ public class MainActivity extends Activity {
         							}else if("Advisory".equals(level)){
         								color = "GREEN";
         							}
-        				    		htmlText.append("<p><div class=\"box\"><div class=\"level\" style=\"background-color:" + color + ";\"><b>" + level + "</b>" + "</div>" + desc + 
-        				    				"<br /><b>Time issued: </b>" + timeissued + " UTC<br /><b>Expires at: </b>" + 
-        				    				purgetime + " UTC<br /><b>Regions affected: </b>" + evregions + "<br /><b>Originator: </b>" 
-        				    				+ org + "<br /><b>Callsign: </b>" + callsign + "<br /></div></p>");
+        				    		htmlText.append("<p><div class=\"box\"><div class=\"level\" style=\"background-color:" + color + ";\"><b>" + level + "</b>" + "</div>" + 
+        				    				desc + "<br /><b>Time issued: </b>" + timeissued + " UTC<br /><b>Expires at: </b>" + purgetime + " UTC<br /><b>Regions affected: </b>" + 
+        				    				evregions + "<br /><b>Originator: </b>" + org + "<br /><b>Callsign: </b>" + callsign + "<br /></div></p>");
         				    		easmsg.moveToNext();
         				    	}
         				    	htmlText.append("</body></html>");
@@ -744,8 +743,19 @@ public class MainActivity extends Activity {
             					"No supported device found!",
             					Toast.LENGTH_LONG).show();
         		    	stopButton.performClick();
+        		    } else if (currentLine.contains("cb transfer status: 5, canceling")) {
+        		    	// Device disconnected
+        		    	// Log command output
+                        Log.d(TAG, "Output: " + currentLine);
+        		    	// Stop native processes and audio
+        		    	if (dongleUnplugged == false) {
+        		    		Log.d(TAG, "Device disconnected");
+        		    		stopButton.performClick();
+        		    		dongleUnplugged = true;
+        		    	}
+        		    	
         		    } else if (currentLine.contains("warning: noninteger number of samples read")) {
-        		    	// Drop this message      		    	
+        		    	// Drop this message
         		    } else {
                     	// Log command output
                         Log.d(TAG, "Output: " + currentLine);
@@ -755,7 +765,6 @@ public class MainActivity extends Activity {
                 }
             } catch (IOException t) {
             } catch (ParseException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
         }
