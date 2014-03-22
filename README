@@ -1,6 +1,7 @@
 SDRWeather
 Author: Keith Conger <keith.conger@gmail.com>
 http://sdrweather.thecongers.org
+License: 
 
 Weather Radio and EAS Alert Reader that uses rtl_fm to demodulate 
 FM from a supported rtl_sdr device and multimon-ng to decode EAS
@@ -18,28 +19,26 @@ Current Features:
 * Selectable Frequencies
 * Alert Notifications
 * Widget to display alerts
+* Option to unmute audio when alert recieved
 * Offline FIPS and CLC Location Code Databases
 * Offline Event Code Database
-
-Future:
-* Check to see if you are in currently affected region
 
 To build:
 1) Run ndk-build inside the jni folder
 2) Then build the project in Eclipse 
 
 Software Used:
-libusb mods and Android.mk from rtl_tcp_andro
-https://github.com/martinmarinov/rtl_tcp_andro-
-
-libusb
-http://www.libusb.org/
-
 rtl_fm from rtl-sdr
 http://sdr.osmocom.org/trac/wiki/rtl-sdr
 
 multimonNG
 https://github.com/EliasOenal/multimonNG/
+
+libusb mods and Android.mk from rtl_tcp_andro
+https://github.com/martinmarinov/rtl_tcp_andro-
+
+libusb
+http://www.libusb.org/
 
 RootTools
 https://github.com/Stericson/RootTools

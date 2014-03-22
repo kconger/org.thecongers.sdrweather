@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -375,6 +376,25 @@ public class MainActivity extends Activity {
             	Log.d(TAG, "Settings Menu was selected");
             	Intent i = new Intent(getApplicationContext(), UserSettingActivity.class);
                 startActivityForResult(i, SETTINGS_RESULT);
+                return true;
+            case R.id.action_about:
+                // About Menu was selected
+            	Log.d(TAG, "About Menu was selected");
+            	// custom dialog
+    			final Dialog dialog = new Dialog(this);
+    			dialog.setContentView(R.layout.about_dialog_layout);
+    			dialog.setTitle("About...");
+
+    			Button dialogButton = (Button) dialog.findViewById(R.id.about_button);
+    			// Close the custom dialog when button is clicked
+    			dialogButton.setOnClickListener(new View.OnClickListener() {
+    				@Override
+    				public void onClick(View v) {
+    					dialog.dismiss();
+    				}
+    			});
+    			Log.d(TAG, "Show dialog");
+    			dialog.show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
