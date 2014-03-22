@@ -62,13 +62,6 @@
 		License: GPLv2
 		\n
         Software Used:\n
-		libusb mods and Android.mk from rtl_tcp_andro\n
-		https://github.com/martinmarinov/rtl_tcp_andro-\n
-		License: GPLv2\n
-		\n
-		libusb\n
-		http://www.libusb.org/\n
-		License: GPLv2\n
 		\n
 		rtl_fm from rtl-sdr\n
 		http://sdr.osmocom.org/trac/wiki/rtl-sdr\n
@@ -76,6 +69,10 @@
 		\n
 		multimonNG\n
 		https://github.com/EliasOenal/multimonNG/\n
+		License: GPLv2\n
+		\n
+		libusb\n
+		http://www.libusb.org/\n
 		License: GPLv2\n
 		\n
 		RootTools\n

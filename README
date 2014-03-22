@@ -34,9 +34,6 @@ http://sdr.osmocom.org/trac/wiki/rtl-sdr
 multimonNG
 https://github.com/EliasOenal/multimonNG/
 
-libusb mods and Android.mk from rtl_tcp_andro
-https://github.com/martinmarinov/rtl_tcp_andro-
-
 libusb
 http://www.libusb.org/
 

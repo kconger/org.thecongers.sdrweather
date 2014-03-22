@@ -5,12 +5,12 @@ APP_ABI:= armeabi armeabi-v7a x86
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
- libusb-andro/libusb/core.c \
- libusb-andro/libusb/descriptor.c \
- libusb-andro/libusb/io.c \
- libusb-andro/libusb/sync.c \
- libusb-andro/libusb/os/linux_usbfs.c \
- libusb-andro/libusb/os/threads_posix.c\
+ libusb/libusb/core.c \
+ libusb/libusb/descriptor.c \
+ libusb/libusb/io.c \
+ libusb/libusb/sync.c \
+ libusb/libusb/os/linux_usbfs.c \
+ libusb/libusb/os/threads_posix.c\
  rtl-sdr/src/rtl_fm.c \
  rtl-sdr/src/convenience/convenience.c \
  rtl-sdr/src/librtlsdr.c \
@@ -21,15 +21,15 @@ LOCAL_SRC_FILES:= \
  rtl-sdr/src/tuner_r82xx.c
 
 LOCAL_C_INCLUDES += \
-libusb-andro \
-libusb-andro/libusb \
-libusb-andro/libusb/os \
-libusb-andro/libusb \
+libusb \
+libusb/libusb \
+libusb/libusb/os \
+libusb/libusb \
 rtl-sdr/include \
 rtl-sdr/src \
 rtl-sdr/src/convenience
 
-LOCAL_CFLAGS += -DLIBUSB_DESCRIBE=""  -O3 
+LOCAL_CFLAGS += -DLIBUSB_DESCRIBE=""  -O3
 LOCAL_MODULE:= rtl_fm
 LOCAL_PRELINK_MODULE:= true
 include $(BUILD_EXECUTABLE)
