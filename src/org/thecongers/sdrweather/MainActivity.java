@@ -1,5 +1,6 @@
 package org.thecongers.sdrweather;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -27,7 +28,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Dialog;
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -199,7 +200,6 @@ public class MainActivity extends Activity {
 			Runtime.getRuntime().exec(command3.toString());
 		} catch (IOException e) {
 		}
-        
     }
     
     @Override
@@ -378,23 +378,14 @@ public class MainActivity extends Activity {
                 startActivityForResult(i, SETTINGS_RESULT);
                 return true;
             case R.id.action_about:
-                // About Menu was selected
-            	Log.d(TAG, "About Menu was selected");
-            	// custom dialog
-    			final Dialog dialog = new Dialog(this);
-    			dialog.setContentView(R.layout.about_dialog_layout);
-    			dialog.setTitle("About...");
-
-    			Button dialogButton = (Button) dialog.findViewById(R.id.about_button);
-    			// Close the custom dialog when button is clicked
-    			dialogButton.setOnClickListener(new View.OnClickListener() {
-    				@Override
-    				public void onClick(View v) {
-    					dialog.dismiss();
-    				}
-    			});
-    			Log.d(TAG, "Show dialog");
-    			dialog.show();
+                // About was selected
+            	Log.d(TAG, "About was selected");
+            	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            	builder.setTitle("About");
+            	builder.setMessage(readRawTextFile(this, R.raw.about));
+            	builder.setPositiveButton("OK", null);
+            	@SuppressWarnings("unused")
+				AlertDialog dialog = builder.show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -897,5 +888,26 @@ public class MainActivity extends Activity {
 	        returnVal += Integer.toString(( md5Bytes[i] & 0xff ) + 0x100, 16).substring(1);
 	    }
 	    return returnVal.toUpperCase(Locale.US);
+	}
+	
+	// Read raw text file
+	public static String readRawTextFile(Context ctx, int resId)
+	{
+	    InputStream inputStream = ctx.getResources().openRawResource(resId);
+
+	    InputStreamReader inputreader = new InputStreamReader(inputStream);
+	    BufferedReader buffreader = new BufferedReader(inputreader);
+	    String line;
+	    StringBuilder text = new StringBuilder();
+
+	    try {
+	        while (( line = buffreader.readLine()) != null) {
+	            text.append(line);
+	            text.append('\n');
+	        }
+	    } catch (IOException e) {
+	        return null;
+	    }
+	    return text.toString();
 	}
 }

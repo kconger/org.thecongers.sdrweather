@@ -53,35 +53,5 @@
     
     <string name="appwidget_label">SDRWeather</string>
     <string name="app_icon_desc">SDRWeather</string>
-    
-    <string name="about_dialog_text">
-        \n
-        SDRWeather\n
-		Author: Keith Conger keith.conger@gmail.com\n
-		http://sdrweather.thecongers.org\n
-		License: GPLv2
-		\n
-        Software Used:\n
-		\n
-		rtl_fm from rtl-sdr\n
-		http://sdr.osmocom.org/trac/wiki/rtl-sdr\n
-		License: GPLv2\n
-		\n
-		multimonNG\n
-		https://github.com/EliasOenal/multimonNG/\n
-		License: GPLv2\n
-		\n
-		libusb\n
-		http://www.libusb.org/\n
-		License: GPLv2\n
-		\n
-		RootTools\n
-		https://github.com/Stericson/RootTools\n
-		\n
-		Android SQLiteAssetHelper\n
-		https://github.com/jgilfelt/android-sqlite-asset-helper\n
-		\n	
-	</string>
-    <string name="about_button_text">Close</string>
 
 </resources>
