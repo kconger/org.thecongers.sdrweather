@@ -9,18 +9,18 @@ package org.thecongers.sdrweather;
 
 public final class R {
     public static final class array {
-        public static final int country=0x7f080002;
-        public static final int countryValues=0x7f080003;
-        public static final int frequency_array=0x7f080000;
-        public static final int frequency_arrayValues=0x7f080001;
+        public static final int country=0x7f090002;
+        public static final int countryValues=0x7f090003;
+        public static final int frequency_array=0x7f090000;
+        public static final int frequency_arrayValues=0x7f090001;
     }
     public static final class attr {
     }
     public static final class color {
-        public static final int green=0x7f050003;
-        public static final int red=0x7f050001;
-        public static final int white=0x7f050000;
-        public static final int yellow=0x7f050002;
+        public static final int green=0x7f060003;
+        public static final int red=0x7f060001;
+        public static final int white=0x7f060000;
+        public static final int yellow=0x7f060002;
     }
     public static final class dimen {
         /**  Default screen margins, per the Android Design guidelines. 
@@ -29,66 +29,62 @@ public final class R {
          screen margins) for sw720dp devices (e.g. 10" tablets) in landscape here.
     
          */
-        public static final int activity_horizontal_margin=0x7f060000;
-        public static final int activity_vertical_margin=0x7f060001;
+        public static final int activity_horizontal_margin=0x7f070000;
+        public static final int activity_vertical_margin=0x7f070001;
     }
     public static final class drawable {
         public static final int app_icon=0x7f020000;
     }
     public static final class id {
-        public static final int LinearLayout01=0x7f0b0000;
-        public static final int TextView02=0x7f0b0009;
-        public static final int action_settings=0x7f0b0011;
-        public static final int button1=0x7f0b000c;
-        public static final int button2=0x7f0b000d;
-        public static final int imageButton1=0x7f0b000f;
-        public static final int imageButton2=0x7f0b0010;
-        public static final int spinner1=0x7f0b000b;
-        public static final int textView1=0x7f0b0005;
-        public static final int textView10=0x7f0b0008;
-        public static final int textView2=0x7f0b000a;
-        public static final int textView3=0x7f0b000e;
-        public static final int textView4=0x7f0b0004;
-        public static final int textView5=0x7f0b0003;
-        public static final int textView6=0x7f0b0006;
-        public static final int textView7=0x7f0b0001;
-        public static final int textView8=0x7f0b0002;
-        public static final int textView9=0x7f0b0007;
+        public static final int LinearLayout01=0x7f0c0000;
+        public static final int action_about=0x7f0c000d;
+        public static final int action_settings=0x7f0c000c;
+        public static final int alert=0x7f0c000b;
+        public static final int button1=0x7f0c0006;
+        public static final int button2=0x7f0c0007;
+        public static final int full_widget=0x7f0c0009;
+        public static final int logo=0x7f0c000a;
+        public static final int scrollView1=0x7f0c0002;
+        public static final int spinner1=0x7f0c0005;
+        public static final int switch1=0x7f0c0008;
+        public static final int textView10=0x7f0c0001;
+        public static final int textView2=0x7f0c0004;
+        public static final int webView1=0x7f0c0003;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
+        public static final int sdrweather_appwidget_layout=0x7f030001;
     }
     public static final class menu {
-        public static final int main=0x7f0a0000;
+        public static final int main=0x7f0b0000;
+    }
+    public static final class raw {
+        public static final int about=0x7f050000;
     }
     public static final class string {
-        public static final int action_settings=0x7f070001;
-        public static final int app_name=0x7f070000;
-        public static final int audio=0x7f07000e;
-        public static final int callsign=0x7f070008;
-        public static final int counties=0x7f070004;
-        public static final int eventdesc=0x7f070003;
-        public static final int eventlevel=0x7f070002;
-        public static final int issuetime=0x7f070007;
-        public static final int originator=0x7f070005;
-        public static final int output=0x7f07000a;
-        public static final int output_header=0x7f070009;
-        public static final int play_button=0x7f07000f;
-        public static final int pref_country_name=0x7f070017;
-        public static final int pref_country_summary=0x7f070018;
-        public static final int pref_freq_name=0x7f070012;
-        public static final int pref_freq_summary=0x7f070013;
-        public static final int pref_gain_name=0x7f070014;
-        public static final int pref_gain_summary=0x7f070015;
-        public static final int pref_start_audio_name=0x7f070019;
-        public static final int pref_start_audio_summary=0x7f07001a;
-        public static final int purgetime=0x7f070006;
-        public static final int rtlsettings=0x7f070011;
-        public static final int spinner_desc=0x7f07000b;
-        public static final int start=0x7f07000c;
-        public static final int stop=0x7f07000d;
-        public static final int stop_button=0x7f070010;
-        public static final int uisettings=0x7f070016;
+        public static final int action_about=0x7f080002;
+        public static final int action_settings=0x7f080001;
+        public static final int app_icon_desc=0x7f080016;
+        public static final int app_name=0x7f080000;
+        public static final int appwidget_label=0x7f080015;
+        public static final int audio=0x7f080008;
+        public static final int output=0x7f080004;
+        public static final int output_header=0x7f080003;
+        public static final int pref_country_name=0x7f080011;
+        public static final int pref_country_summary=0x7f080012;
+        public static final int pref_freq_name=0x7f08000a;
+        public static final int pref_freq_summary=0x7f08000b;
+        public static final int pref_gain_name=0x7f08000c;
+        public static final int pref_gain_summary=0x7f08000d;
+        public static final int pref_sqel_name=0x7f08000e;
+        public static final int pref_sqel_summary=0x7f08000f;
+        public static final int pref_start_audio_name=0x7f080013;
+        public static final int pref_start_audio_summary=0x7f080014;
+        public static final int rtlsettings=0x7f080009;
+        public static final int spinner_desc=0x7f080005;
+        public static final int start=0x7f080006;
+        public static final int stop=0x7f080007;
+        public static final int uisettings=0x7f080010;
     }
     public static final class style {
         /** 
@@ -112,13 +108,14 @@ public final class R {
     
  API 14 theme customizations can go here. 
          */
-        public static final int AppBaseTheme=0x7f090000;
+        public static final int AppBaseTheme=0x7f0a0000;
         /**  Application theme. 
  All customizations that are NOT specific to a particular API-level can go here. 
          */
-        public static final int AppTheme=0x7f090001;
+        public static final int AppTheme=0x7f0a0001;
     }
     public static final class xml {
-        public static final int user_settings=0x7f040000;
+        public static final int sdrweather_appwidget=0x7f040000;
+        public static final int user_settings=0x7f040001;
     }
 }
