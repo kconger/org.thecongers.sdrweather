@@ -11,7 +11,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
-import android.util.Log;
+//For debugging
+//import android.util.Log;
 
 import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
 
@@ -21,7 +22,8 @@ public class EasDatabase extends SQLiteAssetHelper {
 	public static final String DEBUG_TAG = "EASMSGDB";
 	private static final String DATABASE_NAME = "easmsg.db";
     private static final int DATABASE_VERSION = 1;
-	private static final String TAG = "EASDB";
+    // For debugging
+	//private static final String TAG = "EASDB";
 
     public EasDatabase(Context context) {
     	
@@ -58,7 +60,7 @@ public class EasDatabase extends SQLiteAssetHelper {
 	// Add event to database
     void addEasMsg(EasMsg easmsg) {
     	
-    	Log.d(TAG, "Adding event to database");
+    	//Log.d(TAG, "Adding event to database");
     	SQLiteDatabase db = this.getWritableDatabase();
     	String sqlTables = "easMsg";
     	
@@ -81,7 +83,7 @@ public class EasDatabase extends SQLiteAssetHelper {
     
     // Purge expired events
     void purgeExpiredMsg() {
-    	Log.d(TAG, "Purging old events from DB");
+    	//Log.d(TAG, "Purging old events from DB");
     	SQLiteDatabase db = this.getWritableDatabase();
     	String sqlTables = "easMsg";
     	

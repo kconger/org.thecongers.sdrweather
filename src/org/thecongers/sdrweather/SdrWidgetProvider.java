@@ -54,7 +54,7 @@ public class SdrWidgetProvider extends AppWidgetProvider {
 	    	  }
 	    	  
 	    	  int numEvents = easmsg.getCount();
-	    	  Log.d(TAG, "Number of active events: " + String.valueOf(numEvents));
+	    	  //Log.d(TAG, "Number of active events: " + String.valueOf(numEvents));
 	    	  if (numEvents > 1){
 	    		  if (numEvents == 2){
 	    			  message.append("\nand " + String.valueOf(numEvents - 1 ) + " other active event..." );
