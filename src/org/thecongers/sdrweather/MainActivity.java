@@ -112,10 +112,8 @@ public class MainActivity extends Activity {
         	boolean isChecked) {
         		if ( audioTrack != null ) {
         			if (isChecked) {
-        				//Log.d(TAG, "Audio is set to on" );
         				audioTrack.setStereoVolume(1.0f, 1.0f);
         			} else {
-        				//Log.d(TAG, "Audio is set to off" );
         				audioTrack.setStereoVolume(0.0f, 0.0f);
         			}
         		}
@@ -144,13 +142,11 @@ public class MainActivity extends Activity {
         
         // Show last currently active event if available
         Cursor easmsg = easdb.getActiveEvent();  
-        Log.d(TAG, "Lookup active events");
 	    if( easmsg != null && easmsg.moveToFirst() ){
 	    	StringBuilder htmlText = new StringBuilder();
 	    	htmlText.append(eventLook);
 	    	while (easmsg.isAfterLast() == false) 
 	    	{
-	    		Log.d(TAG, "Found an event!");
 	    		String color = null;
 	    		String level = easmsg.getString(easmsg.getColumnIndex("level"));
 	    		String desc = easmsg.getString(easmsg.getColumnIndex("desc"));
@@ -214,13 +210,11 @@ public class MainActivity extends Activity {
         activeEventsView.loadData("<html></html>", "text/html", null);
         activeEventsView.loadData("<html><body>No active events</body></html>", "text/html", null);
         
-        Log.d(TAG, "Lookup active events");
         if( easmsg != null && easmsg.moveToFirst() ){
 	    	StringBuilder htmlText = new StringBuilder();
 	    	htmlText.append(eventLook);
 	    	while (easmsg.isAfterLast() == false) 
 	    	{
-	    		Log.d(TAG, "Found an event!");
 	    		String color = null;
 	    		String level = easmsg.getString(easmsg.getColumnIndex("level"));
 	    		String desc = easmsg.getString(easmsg.getColumnIndex("desc"));
@@ -249,19 +243,9 @@ public class MainActivity extends Activity {
 	    }
     }
 
-    /*
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mTask.stop();
-        
-    }
-    */
-
 	// Start button press
     public void onClickStart(View view)
     {
-    	Log.d(TAG, "Start Pressed" );
     	dongleUnplugged = false;
     	if (RootTools.isRootAvailable() && RootTools.isBusyboxAvailable()) {
     		// Get Frequency and gain from preferences
@@ -301,7 +285,6 @@ public class MainActivity extends Activity {
     // Stop button press
     public void onClickStop(View view)
     {
-    	Log.d(TAG, "Stop Pressed" );
     	audioStop();
     	nativeTask.stop();
     	// Enable start button
@@ -325,7 +308,6 @@ public class MainActivity extends Activity {
             	Log.d(TAG, "Named Pipe Not Found" );
             }
             byte [] audioData = new byte[minBuffSize/2]; 
-            Log.d(TAG, "Read audio from named pipe" );
             while(!stopAudioRead) {
             	try {
 					audioStream.read(audioData, 0, audioData.length);
@@ -375,13 +357,11 @@ public class MainActivity extends Activity {
     	switch (item.getItemId()) {
             case R.id.action_settings:
                 // Settings Menu was selected
-            	Log.d(TAG, "Settings Menu was selected");
             	Intent i = new Intent(getApplicationContext(), UserSettingActivity.class);
                 startActivityForResult(i, SETTINGS_RESULT);
                 return true;
             case R.id.action_about:
                 // About was selected
-            	Log.d(TAG, "About was selected");
             	AlertDialog.Builder builder = new AlertDialog.Builder(this);
             	builder.setTitle("About");
             	builder.setMessage(readRawTextFile(this, R.raw.about));
@@ -470,7 +450,6 @@ public class MainActivity extends Activity {
         @Override
         protected Void doInBackground(String... params) {
             try {
-            	Log.d(TAG, "Executing native code");
             	// Build command and execute
             	String dataRoot = getApplicationContext().getFilesDir().getParentFile().getPath();
             	//Test wave
@@ -518,8 +497,6 @@ public class MainActivity extends Activity {
                     if (currentLine.contains("EAS:")) {
                     	// Log command output
                         Log.d(TAG, "Output: " + currentLine + "\n");
-                        
-        				Log.d(TAG, "Found EAS Alert, parsing.....");
         				
         				// Unumute audio if configured
         		        if (sharedPrefs.getBoolean("prefStartAudio", true)) {
@@ -554,13 +531,11 @@ public class MainActivity extends Activity {
         					 * * EAS Ð EAS Participant; Broadcasters. Generally only used with test messages.
         					 */
         					org = easMsg[1];
-        					Log.d(TAG, "Originator Code: " + org);
         					
         					/*
         					 * EEE Ñ Event code; programmed at time of event
         					 */
         					String eee = easMsg[2];
-        					Log.d(TAG, "Event Code: " + eee);
         					//Look up event code in database, return level and description
         					events = eventdb.getEventInfo(eee);
         					String color = null;
@@ -599,14 +574,11 @@ public class MainActivity extends Activity {
         					if( country == 0 ){ // United States
         						for (int i=3; i < size - 2; i++) {
         							locationCodes[j] = easMsg[i];
-        							Log.d(TAG, "Location Code: " + locationCodes[j]);
         							
         							// Look up fips code in database, return county and state
         							String fipscode = locationCodes[j].substring(1, 6);
-        							Log.d(TAG, "Looking up county/state for fips code: " + fipscode);
         							fips = fipsdb.getCountyState(fipscode);
         							if( fips != null && fips.moveToFirst() ){
-        								Log.d(TAG, "Location: " + fips.getString(fips.getColumnIndex("county")) + ", " + fips.getString(fips.getColumnIndex("state")));
         								regions.append(fips.getString(fips.getColumnIndex("county")) + "," + fips.getString(fips.getColumnIndex("state")) + ";");
         							}
         							j++;
@@ -614,14 +586,11 @@ public class MainActivity extends Activity {
         					}else if( country == 1 ){ // Canada
         						for (int i=3; i < size - 2; i++) {
         							locationCodes[j] = easMsg[i];
-        							Log.d(TAG, "Location Code: " + locationCodes[j]);
 
         							// Look up clc code in database, return region and province/territory
         							String clccode = locationCodes[j].substring(1, 6);
-        							Log.d(TAG, "Looking up region and province/territory information for clc code: " + clccode);
         							clc = clcdb.getCountyState(clccode);
         							if( clc != null && clc.moveToFirst() ){
-        								Log.d(TAG, "Location: " + clc.getString(clc.getColumnIndex("region")) + ", " + clc.getString(clc.getColumnIndex("provinceterritory")));
         								regions.append(clc.getString(clc.getColumnIndex("region")) + "," + clc.getString(clc.getColumnIndex("provinceterritory")) + ";");
         							}
         							j++;
@@ -634,7 +603,6 @@ public class MainActivity extends Activity {
         					 * however; 15 minutes is more common, especially on NOAA Weather Radio's tests.
         					 */
         					String purgeTime = temp[1];
-        					Log.d(TAG, "Purge time: " + purgeTime);
         					String purgeTimeHour = purgeTime.substring(0,2);
         					String purgeTimeMin = purgeTime.substring(2,4);
         				
@@ -666,7 +634,6 @@ public class MainActivity extends Activity {
         					SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         					formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         					String curdate = formatter.format(date2);
-        					Log.d(TAG, "Message Received at (UTC): " + curdate);
         					
         					// Calculate EAS event expiration date/time
         					cal.clear();
@@ -674,7 +641,6 @@ public class MainActivity extends Activity {
         					Date idate = cal.getTime();
         					formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         					String issuedate = formatter.format(idate);
-        					Log.d(TAG, "Time of issue (UTC): " + issuedate);
         					
         					int exphours = Integer.parseInt(purgeTimeHour);
         					int expmins = Integer.parseInt(purgeTimeMin);
@@ -683,7 +649,6 @@ public class MainActivity extends Activity {
         					Date edate = cal.getTime();
         					formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         					String expdate = formatter.format(edate);
-        					Log.d(TAG, "Expires at (UTC): " + expdate);
         				
         					/*
         					 * LLLLLLLL Ñ Eight-character station callsign identification, with "/" used instead of "Ð" (such as the first eight
@@ -691,21 +656,18 @@ public class MainActivity extends Activity {
         					 * programmed from Los Angeles).
         					 */
         					callSign = easMsg[size - 1];
-        					Log.d(TAG, "Call Sign: " + callSign);
         					
         					//Update EAS event database
         					easdb.addEasMsg (new EasMsg(org, eventdesc, eventlevel, curdate, issuedate, callSign, expdate, regions.toString(), sharedPrefs.getString("prefDefaultCountry", "0")));
         					
         					// Update active events list in app
         					Cursor easmsg = easdb.getActiveEvent();
-        			        Log.d(TAG, "Lookup active events");
         				    if( easmsg != null && easmsg.moveToFirst() ){
         				    	StringBuilder
         				    	htmlText = new StringBuilder();
         				    	htmlText.append(eventLook);
         				    	while (easmsg.isAfterLast() == false) 
         				    	{
-        				    		Log.d(TAG, "Found an event!");
         				    		color = null;
         				    		String level = easmsg.getString(easmsg.getColumnIndex("level"));
         				    		String desc = easmsg.getString(easmsg.getColumnIndex("desc"));
@@ -735,7 +697,6 @@ public class MainActivity extends Activity {
         				    
         					// Send a notification
     						notificationID = 1;
-    						Log.d(TAG, "notificationID: " + notificationID);
         					Notify(eventlevel + " from " + callSign,
         							eventdesc + " was issued", notificationID);
         					
@@ -819,7 +780,6 @@ public class MainActivity extends Activity {
  	    			}
  	    			out2.close();
  	    			in2.close();
- 	    			Log.d(TAG, "File " + assetPath + " updated!");
  	    		}
  	    	} else {
  	    		// File doesn't exist so go ahead and copy it
@@ -832,7 +792,6 @@ public class MainActivity extends Activity {
  	    		}
  	    		out.close();
  	    		in.close();
- 	    		Log.d(TAG, "File " + assetPath + " copied successfully!");
  	    		}
 
  	    } catch (IOException e) {
