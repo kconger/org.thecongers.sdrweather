@@ -713,7 +713,7 @@ public class MainActivity extends Activity {
             					"No supported device found!",
             					Toast.LENGTH_LONG).show();
         		    	stopButton.performClick();
-        		    } else if (currentLine.contains("cb transfer status: 5, canceling")) {
+        		    } else if (currentLine.contains("cb transfer status: 5, canceling") || currentLine.contains("Segmentation")) {
         		    	// Device disconnected
         		    	// Log command output
                         Log.d(TAG, "Output: " + currentLine);
