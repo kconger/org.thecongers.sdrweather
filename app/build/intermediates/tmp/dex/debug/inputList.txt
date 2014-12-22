@@ -1,0 +1,4 @@
+/Users/keithconger/Projects/Android/AndroidstudioProjects/org.thecongers.sdrweather/app/build/intermediates/classes/debug
+/Users/keithconger/Projects/Android/AndroidstudioProjects/org.thecongers.sdrweather/app/build/intermediates/pre-dexed/debug/sqliteassethelper-2.0.1-60b4f93e1ce0d35fdf2a27cf1f7507ebf844b829.jar
+/Users/keithconger/Projects/Android/AndroidstudioProjects/org.thecongers.sdrweather/app/build/intermediates/pre-dexed/debug/RootTools-3.4-0076b78e0dcdbfc418bedb02f56b295d52142cb7.jar
+/Users/keithconger/Projects/Android/AndroidstudioProjects/org.thecongers.sdrweather/app/build/intermediates/pre-dexed/debug/support-v4-19.1.0-3f11264802240824ae17fd3b52f6e8251ddd7cee.jar

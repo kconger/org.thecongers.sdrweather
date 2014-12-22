@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:title="@string/uisettings" >
+    	<ListPreference
+            android:key="prefDefaultCountry"
+            android:title="@string/pref_country_name"
+            android:summary="@string/pref_country_summary"
+            android:entries="@array/country"
+            android:entryValues="@array/countryValues"
+            />
+    	<CheckBoxPreference
+            android:defaultValue="true"
+            android:key="prefStartAudio"
+            android:summary="@string/pref_start_audio_summary"
+            android:title="@string/pref_start_audio_name" >
+        </CheckBoxPreference>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/rtlsettings" >
+    	<ListPreference
+            android:key="prefDefaultFreq"
+            android:title="@string/pref_freq_name"
+            android:summary="@string/pref_freq_summary"
+            android:entries="@array/frequency_array"
+            android:entryValues="@array/frequency_arrayValues"
+            />
+    	<EditTextPreference
+        	android:title="@string/pref_gain_name"
+            android:summary="@string/pref_gain_summary"
+            android:defaultValue="42"
+            android:key="prefGain"
+            />
+    	<EditTextPreference
+        	android:title="@string/pref_sqel_name"
+            android:summary="@string/pref_sqel_summary"
+            android:defaultValue="0"
+            android:key="prefSqel"
+            />
+    </PreferenceCategory>
+
+</PreferenceScreen>
+<!-- From: file:/Users/keithconger/Projects/Android/AndroidstudioProjects/org.thecongers.sdrweather/app/src/main/res/xml/user_settings.xml -->
