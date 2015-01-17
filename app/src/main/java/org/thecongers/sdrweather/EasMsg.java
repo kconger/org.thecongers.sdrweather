@@ -18,19 +18,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 package org.thecongers.sdrweather;
 
-public class EasMsg {
+class EasMsg {
 
 	    //private variables
 	    int _id;
-	    String _org;
-	    String _desc;
-	    String _level;
-	    String _timereceived;
-	    String _timeissued;
-	    String _callsign;
-	    String _purgetime;
-	    String _regions;
-	    String _country;
+	    private String _org;
+	    private String _desc;
+	    private String _level;
+	    private String _timereceived;
+	    private String _timeissued;
+	    private String _callsign;
+	    private String _purgetime;
+	    private String _regions;
+	    private String _country;
 	     
 	    // Empty constructor
 	    public EasMsg(){

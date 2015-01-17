@@ -38,14 +38,12 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.Spinner;
 import android.widget.Switch;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.stericson.RootTools.RootTools;
@@ -71,11 +69,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class MainActivity extends Activity {
-    RtlTask nativeTask;
+    private RtlTask nativeTask;
     private static final String TAG = "SDRWeather";
-    private Cursor events;
-    private Cursor fips;
-    private Cursor clc;
     private EventDatabase eventdb;
     private FipsDatabase fipsdb;
     private ClcDatabase clcdb;
@@ -87,22 +82,14 @@ public class MainActivity extends Activity {
     private boolean stopAudioRead = false;
     private boolean dongleUnplugged = false;
     private AudioTrack audioTrack;
-    private Thread audioThread;
     private Button startButton;
     private Button stopButton;
     private Switch audioSwitch;
     private WebView activeEventsView;
-    TextView evLvlText;
-    TextView evDescText;
-    TextView regionsText;
-    TextView orgText;
-    TextView purgeTimeText;
-    TextView issueTimeText;
-    TextView callsignText;
-    int minBuffSize;
+    private int minBuffSize;
     private int cbTransfer = 0;
     // Controls the look of events in the app
-    String eventLook = "<!DOCTYPE html><html><head><style>" + 
+    private final String eventLook = "<!DOCTYPE html><html><head><style>" +
     		"div.box{padding:5px;border:3px solid gray;margin:0px;font-size:x-small;}" + 
     		"div.level{padding:5px;border:3px solid gray;margin:0px;font-size:small;}" + 
     		"</style></head><body>";
@@ -128,6 +115,7 @@ public class MainActivity extends Activity {
             Process p = Runtime.getRuntime().exec(killCmd);
             int exitCode = p.waitFor();
         } catch (IOException e) {
+            Log.d(TAG,"IOException", e);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -176,7 +164,7 @@ public class MainActivity extends Activity {
 	    if( easmsg != null && easmsg.moveToFirst() ){
 	    	StringBuilder htmlText = new StringBuilder();
 	    	htmlText.append(eventLook);
-	    	while (easmsg.isAfterLast() == false) 
+	    	while (!easmsg.isAfterLast())
 	    	{
 	    		String color = null;
 	    		String level = easmsg.getString(easmsg.getColumnIndex("level"));
@@ -195,10 +183,7 @@ public class MainActivity extends Activity {
 				}else if("Advisory".equals(level)){
 					color = "GREEN";
 				}
-	    		htmlText.append("<p><div class=\"box\"><div class=\"level\" style=\"background-color:" + color + ";\"><b>" + level + "</b>" + "</div>" + desc + 
-	    				"<br /><b>Time issued: </b>" + timeissued + " UTC<br /><b>Expires at: </b>" + 
-	    				purgetime + " UTC<br /><b>Regions affected: </b>" + regions + "<br /><b>Originator: </b>" 
-	    				+ org + "<br /><b>Callsign: </b>" + callsign + "<br /></div></p>");
+	    		htmlText.append("<p><div class=\"box\"><div class=\"level\" style=\"background-color:").append(color).append(";\"><b>").append(level).append("</b>").append("</div>").append(desc).append("<br /><b>Time issued: </b>").append(timeissued).append(" UTC<br /><b>Expires at: </b>").append(purgetime).append(" UTC<br /><b>Regions affected: </b>").append(regions).append("<br /><b>Originator: </b>").append(org).append("<br /><b>Callsign: </b>").append(callsign).append("<br /></div></p>");
 	    		easmsg.moveToNext();
 	    	}
 	    	htmlText.append("</body></html>");
@@ -217,17 +202,18 @@ public class MainActivity extends Activity {
         copyFile("nativeFolder/stop.sh",dataRoot + "/nativeFolder/stop.sh",getBaseContext());
         // Set execute permissions on binaries
         StringBuilder command = new StringBuilder("chmod 700 ");
-        command.append(dataRoot + "/nativeFolder/multimon-ng ");
-        command.append(dataRoot + "/nativeFolder/rtl_fm ");
-        command.append(dataRoot + "/nativeFolder/start.sh ");
-        command.append(dataRoot + "/nativeFolder/stop.sh ");
+        command.append(dataRoot).append("/nativeFolder/multimon-ng ");
+        command.append(dataRoot).append("/nativeFolder/rtl_fm ");
+        command.append(dataRoot).append("/nativeFolder/start.sh ");
+        command.append(dataRoot).append("/nativeFolder/stop.sh ");
         // Create named pipe for audio
         StringBuilder command2 = new StringBuilder("mkfifo ");
-        command2.append(dataRoot + "/pipe");
+        command2.append(dataRoot).append("/pipe");
         try {
 			Runtime.getRuntime().exec(command.toString());
 			Runtime.getRuntime().exec(command2.toString());
 		} catch (IOException e) {
+            Log.d(TAG,"IOException", e);
 		}
     }
     
@@ -244,7 +230,7 @@ public class MainActivity extends Activity {
         if( easmsg != null && easmsg.moveToFirst() ){
 	    	StringBuilder htmlText = new StringBuilder();
 	    	htmlText.append(eventLook);
-	    	while (easmsg.isAfterLast() == false) 
+	    	while (!easmsg.isAfterLast())
 	    	{
 	    		String color = null;
 	    		String level = easmsg.getString(easmsg.getColumnIndex("level"));
@@ -263,10 +249,7 @@ public class MainActivity extends Activity {
 				}else if("Advisory".equals(level)){
 					color = "GREEN";
 				}
-	    		htmlText.append("<p><div class=\"box\"><div class=\"level\" style=\"background-color:" + color + ";\"><b>" + level + "</b>" + "</div>" + desc + 
-	    				"<br /><b>Time issued: </b>" + timeissued + " UTC<br /><b>Expires at: </b>" + 
-	    				purgetime + " UTC<br /><b>Regions affected: </b>" + regions + "<br /><b>Originator: </b>" 
-	    				+ org + "<br /><b>Callsign: </b>" + callsign + "<br /></div></p>");
+	    		htmlText.append("<p><div class=\"box\"><div class=\"level\" style=\"background-color:").append(color).append(";\"><b>").append(level).append("</b>").append("</div>").append(desc).append("<br /><b>Time issued: </b>").append(timeissued).append(" UTC<br /><b>Expires at: </b>").append(purgetime).append(" UTC<br /><b>Regions affected: </b>").append(regions).append("<br /><b>Originator: </b>").append(org).append("<br /><b>Callsign: </b>").append(callsign).append("<br /></div></p>");
 	    		easmsg.moveToNext();
 	    	}
 	    	htmlText.append("</body></html>");
@@ -289,6 +272,7 @@ public class MainActivity extends Activity {
             Process p = Runtime.getRuntime().exec(killCmd);
             int exitCode = p.waitFor();
         } catch (IOException e) {
+            Log.d(TAG,"IOException", e);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -298,7 +282,7 @@ public class MainActivity extends Activity {
         }
     }
 	// Start button press
-    public void onClickStart(View view)
+    public void onClickStart()
     {
     	dongleUnplugged = false;
     	if (RootTools.isRootAvailable() && RootTools.isBusyboxAvailable()) {
@@ -337,7 +321,7 @@ public class MainActivity extends Activity {
     }
     
     // Stop button press
-    public void onClickStop(View view)
+    public void onClickStop()
     {
     	audioStop();
     	nativeTask.stop();
@@ -349,7 +333,7 @@ public class MainActivity extends Activity {
     	freqSpinner.setEnabled(true);
     }
     
-    Runnable m_audioGenerator = new Runnable()
+    private final Runnable m_audioGenerator = new Runnable()
     {       
         public void run()
         {
@@ -364,7 +348,8 @@ public class MainActivity extends Activity {
             byte [] audioData = new byte[minBuffSize/2]; 
             while(!stopAudioRead) {
             	try {
-					audioStream.read(audioData, 0, audioData.length);
+                    assert audioStream != null;
+                    audioStream.read(audioData, 0, audioData.length);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -384,7 +369,7 @@ public class MainActivity extends Activity {
         audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 22050, AudioFormat.CHANNEL_OUT_MONO,
                                         AudioFormat.ENCODING_PCM_16BIT, minBuffSize, AudioTrack.MODE_STREAM);
         audioTrack.play();
-        audioThread = new Thread(m_audioGenerator);
+        Thread audioThread = new Thread(m_audioGenerator);
         audioThread.start();
     }
 
@@ -420,8 +405,7 @@ public class MainActivity extends Activity {
             	builder.setTitle("About");
             	builder.setMessage(readRawTextFile(this, R.raw.about));
             	builder.setPositiveButton("OK", null);
-            	@SuppressWarnings("unused")
-				AlertDialog dialog = builder.show();
+				builder.show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -499,6 +483,7 @@ public class MainActivity extends Activity {
                 Runtime.getRuntime().exec(killCmd);
                 Log.d(TAG, "stop.sh ran");
             } catch (IOException e) {
+                Log.d(TAG,"IOException", e);
             }
         }
 
@@ -542,6 +527,7 @@ public class MainActivity extends Activity {
                     mProcess = null;
                 }
             } catch (IOException e) {
+                Log.d(TAG,"IOException", e);
             }
             return null;
         }
@@ -564,11 +550,11 @@ public class MainActivity extends Activity {
         		        	audioTrack.setStereoVolume(1.0f, 1.0f);
         		        }
         		        
-        				String org = null;
+        				String org;
         				String eventlevel = null;
         				String eventdesc = null;
-        				String callSign = null;
-        				int notificationID = 0;
+        				String callSign;
+        				int notificationID;
         				
         				// Start parsing message into fields
         				String [] rawEASMsg = currentLine.split(":");
@@ -595,19 +581,10 @@ public class MainActivity extends Activity {
         					 */
         					String eee = easMsg[2];
         					//Look up event code in database, return level and description
-        					events = eventdb.getEventInfo(eee);
-        					String color = null;
+                            Cursor events = eventdb.getEventInfo(eee);
+        					String color;
         					if( events != null && events.moveToFirst() ){
         						eventlevel = events.getString(events.getColumnIndex("eventlevel"));
-        						if("Test".equals(eventlevel)){
-        							color = "WHITE";
-        						}else if("Warning".equals(eventlevel)){
-        							color = "RED";
-        						}else if("Watch".equals(eventlevel)){
-        							color = "YELLOW";
-        						}else if("Advisory".equals(eventlevel)){
-        							color = "GREEN";
-        						}
         						eventdesc = events.getString(events.getColumnIndex("eventdesc"));
         					}
         					
@@ -635,9 +612,9 @@ public class MainActivity extends Activity {
         							
         							// Look up fips code in database, return county and state
         							String fipscode = locationCodes[j].substring(1, 6);
-        							fips = fipsdb.getCountyState(fipscode);
+                                    Cursor fips = fipsdb.getCountyState(fipscode);
         							if( fips != null && fips.moveToFirst() ){
-        								regions.append(fips.getString(fips.getColumnIndex("county")) + "," + fips.getString(fips.getColumnIndex("state")) + ";");
+        								regions.append(fips.getString(fips.getColumnIndex("county"))).append(",").append(fips.getString(fips.getColumnIndex("state"))).append(";");
         							}
         							j++;
         						}
@@ -647,9 +624,9 @@ public class MainActivity extends Activity {
 
         							// Look up clc code in database, return region and province/territory
         							String clccode = locationCodes[j].substring(1, 6);
-        							clc = clcdb.getCountyState(clccode);
+                                    Cursor clc = clcdb.getCountyState(clccode);
         							if( clc != null && clc.moveToFirst() ){
-        								regions.append(clc.getString(clc.getColumnIndex("region")) + "," + clc.getString(clc.getColumnIndex("provinceterritory")) + ";");
+        								regions.append(clc.getString(clc.getColumnIndex("region"))).append(",").append(clc.getString(clc.getColumnIndex("provinceterritory"))).append(";");
         							}
         							j++;
         						}
@@ -724,7 +701,7 @@ public class MainActivity extends Activity {
         				    	StringBuilder
         				    	htmlText = new StringBuilder();
         				    	htmlText.append(eventLook);
-        				    	while (easmsg.isAfterLast() == false) 
+        				    	while (!easmsg.isAfterLast())
         				    	{
         				    		color = null;
         				    		String level = easmsg.getString(easmsg.getColumnIndex("level"));
@@ -743,9 +720,7 @@ public class MainActivity extends Activity {
         							}else if("Advisory".equals(level)){
         								color = "GREEN";
         							}
-        				    		htmlText.append("<p><div class=\"box\"><div class=\"level\" style=\"background-color:" + color + ";\"><b>" + level + "</b>" + "</div>" + 
-        				    				desc + "<br /><b>Time issued: </b>" + timeissued + " UTC<br /><b>Expires at: </b>" + purgetime + " UTC<br /><b>Regions affected: </b>" + 
-        				    				evregions + "<br /><b>Originator: </b>" + org + "<br /><b>Callsign: </b>" + callsign + "<br /></div></p>");
+        				    		htmlText.append("<p><div class=\"box\"><div class=\"level\" style=\"background-color:").append(color).append(";\"><b>").append(level).append("</b>").append("</div>").append(desc).append("<br /><b>Time issued: </b>").append(timeissued).append(" UTC<br /><b>Expires at: </b>").append(purgetime).append(" UTC<br /><b>Regions affected: </b>").append(evregions).append("<br /><b>Originator: </b>").append(org).append("<br /><b>Callsign: </b>").append(callsign).append("<br /></div></p>");
         				    		easmsg.moveToNext();
         				    	}
         				    	htmlText.append("</body></html>");
@@ -776,7 +751,7 @@ public class MainActivity extends Activity {
         		    	// Log command output
                         Log.d(TAG, "Output: " + currentLine);
         		    	// Stop native processes and audio
-        		    	if (dongleUnplugged == false) {
+        		    	if (!dongleUnplugged) {
         		    		Log.d(TAG, "Device disconnected");
         		    		stopButton.performClick();
         		    		dongleUnplugged = true;
@@ -803,6 +778,7 @@ public class MainActivity extends Activity {
                     
                 }
             } catch (IOException t) {
+                Log.d(TAG,"IOException", t);
             } catch (ParseException e) {
 				e.printStackTrace();
 			}
@@ -870,7 +846,7 @@ public class MainActivity extends Activity {
  	
  	// Convert ordinal date format to simple
 	@SuppressLint("SimpleDateFormat")
-	static String formatOrdinal(int year, int day) {
+    private static String formatOrdinal(int year, int day) {
 		  Calendar cal = Calendar.getInstance();
 		  cal.clear();
 		  cal.set(Calendar.YEAR, year);
@@ -881,7 +857,7 @@ public class MainActivity extends Activity {
 	}
 	
 	// Get a files md5sum
-	public static String fileToMD5(String filePath) {
+	private static String fileToMD5(String filePath) {
 	    InputStream inputStream = null;
 	    try {
 	        inputStream = new FileInputStream(filePath);
@@ -901,7 +877,9 @@ public class MainActivity extends Activity {
 	        if (inputStream != null) {
 	            try {
 	                inputStream.close();
-	            } catch (Exception e) { }
+	            } catch (Exception e) {
+                    Log.d(TAG,"Couldn't close stream");
+                }
 	        }
 	    }
 	}
@@ -910,14 +888,14 @@ public class MainActivity extends Activity {
 	@SuppressLint("DefaultLocale")
 	private static String convertHashToString(byte[] md5Bytes) {
 	    String returnVal = "";
-	    for (int i = 0; i < md5Bytes.length; i++) {
-	        returnVal += Integer.toString(( md5Bytes[i] & 0xff ) + 0x100, 16).substring(1);
-	    }
+        for (byte md5Byte : md5Bytes) {
+            returnVal += Integer.toString((md5Byte & 0xff) + 0x100, 16).substring(1);
+        }
 	    return returnVal.toUpperCase(Locale.US);
 	}
 	
 	// Read raw text file
-	public static String readRawTextFile(Context ctx, int resId)
+	private static String readRawTextFile(Context ctx, int resId)
 	{
 	    InputStream inputStream = ctx.getResources().openRawResource(resId);
 

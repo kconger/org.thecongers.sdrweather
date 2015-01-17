@@ -26,7 +26,7 @@ Current Features:
 To build:
 Setup a working adt and ndk environment, then..
 1) Run ndk-build inside the jni folder
-2) Then build the project in Eclipse 
+2) Then build the project in Android Studio
 
 Software Used:
 rtl_fm from rtl-sdr
@@ -43,3 +43,10 @@ https://github.com/Stericson/RootTools
 
 Android SQLiteAssetHelper
 https://github.com/jgilfelt/android-sqlite-asset-helper
+
+Donate:
+If you find any of this useful and want to show appreciation see below:
+
+Play Store: https://play.google.com/store/apps/details?id=org.thecongers.sdrweather
+PayPal: keith.conger@gmail.com
+Bitcoin: 1Pg54vVnaLxNsziA6cy9CTefoEG5iAm9Uh

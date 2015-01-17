@@ -36,10 +36,9 @@ import java.util.TimeZone;
 //import android.util.Log;
 
 @SuppressLint("SimpleDateFormat")
-public class EasDatabase extends SQLiteAssetHelper {
+class EasDatabase extends SQLiteAssetHelper {
 
-	public static final String DEBUG_TAG = "EASMSGDB";
-	private static final String DATABASE_NAME = "easmsg.db";
+    private static final String DATABASE_NAME = "easmsg.db";
     private static final int DATABASE_VERSION = 1;
 
     public EasDatabase(Context context) {

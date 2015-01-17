@@ -24,7 +24,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
 
-public class FipsDatabase extends SQLiteAssetHelper {
+class FipsDatabase extends SQLiteAssetHelper {
 	
     private static final String DATABASE_NAME = "fips.db";
     private static final int DATABASE_VERSION = 1;

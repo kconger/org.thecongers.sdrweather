@@ -25,7 +25,7 @@ import android.database.sqlite.SQLiteQueryBuilder;
 
 import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
 
-public class EventDatabase extends SQLiteAssetHelper {
+class EventDatabase extends SQLiteAssetHelper {
 
     private static final String DATABASE_NAME = "events.db";
     private static final int DATABASE_VERSION = 1;

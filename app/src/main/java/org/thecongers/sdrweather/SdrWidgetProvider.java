@@ -29,7 +29,7 @@ import android.util.Log;
 import android.widget.RemoteViews;
 
 public class SdrWidgetProvider extends AppWidgetProvider {
-	public static final String TAG = "SDRWeatherWidget";
+	private static final String TAG = "SDRWeatherWidget";
 	 
 	   @Override
 	   public void onUpdate(Context context, AppWidgetManager appWidgetManager,
@@ -75,9 +75,9 @@ public class SdrWidgetProvider extends AppWidgetProvider {
 	    	  //Log.d(TAG, "Number of active events: " + String.valueOf(numEvents));
 	    	  if (numEvents > 1){
 	    		  if (numEvents == 2){
-	    			  message.append("\nand " + String.valueOf(numEvents - 1 ) + " other active event..." );
+	    			  message.append("\nand ").append(String.valueOf(numEvents - 1)).append(" other active event...");
 	    		  } else {
-	    			  message.append("\nand " + String.valueOf(numEvents - 1 ) + " other active events..." );
+	    			  message.append("\nand ").append(String.valueOf(numEvents - 1)).append(" other active events...");
 	    		  }
 	    	  }
 	    	  remoteView.setTextViewText(R.id.alert, message);

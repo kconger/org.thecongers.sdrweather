@@ -24,7 +24,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
 
-public class ClcDatabase extends SQLiteAssetHelper {
+class ClcDatabase extends SQLiteAssetHelper {
 
     private static final String DATABASE_NAME = "clc.db";
     private static final int DATABASE_VERSION = 1;
