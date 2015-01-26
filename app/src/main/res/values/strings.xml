@@ -54,4 +54,21 @@
     <string name="appwidget_label">SDRWeather</string>
     <string name="app_icon_desc">SDRWeather</string>
 
+    <string name="noactive_events">No Active Events</string>
+    <string name="timeissued_events">Time issued</string>
+    <string name="expires_events">Expires</string>
+    <string name="regions_events">Regions</string>
+    <string name="originator_events">Originator</string>
+    <string name="callsign_events">Call Sign</string>
+
+    <string name="toast_noroot">Root Access Not Available!</string>
+    <string name="toast_nosupportdevices">Root Access Not Available!</string>
+    <string name="toast_devicedisconnected">Root Access Not Available!</string>
+
+    <string name="notification_from">from</string>
+    <string name="notification_end">was issued</string>
+
+    <string name="alert_about_title">About</string>
+    <string name="alert_about_button">OK</string>
+
 </resources>

@@ -148,7 +148,7 @@ public class MainActivity extends Activity {
         }
         
         activeEventsView = (WebView) findViewById(R.id.webView1); 
-        activeEventsView.loadData("<html><body>No active events</body></html>", "text/html", null);
+        activeEventsView.loadData("<html><body>" + getResources().getString(R.string.noactive_events) + "</body></html>", "text/html", null);
         
         startButton = (Button) findViewById(R.id.button1);
         stopButton = (Button) findViewById(R.id.button2);
@@ -184,7 +184,7 @@ public class MainActivity extends Activity {
 				}else if("Advisory".equals(level)){
 					color = "GREEN";
 				}
-	    		htmlText.append("<p><div class=\"box\"><div class=\"level\" style=\"background-color:").append(color).append(";\"><b>").append(level).append("</b>").append("</div>").append(desc).append("<br /><b>Time issued: </b>").append(timeissued).append(" UTC<br /><b>Expires at: </b>").append(purgetime).append(" UTC<br /><b>Regions affected: </b>").append(regions).append("<br /><b>Originator: </b>").append(org).append("<br /><b>Callsign: </b>").append(callsign).append("<br /></div></p>");
+	    		htmlText.append("<p><div class=\"box\"><div class=\"level\" style=\"background-color:").append(color).append(";\"><b>").append(level).append("</b>").append("</div>").append(desc).append("<br /><b>" + getResources().getString(R.string.timeissued_events) + ": </b>").append(timeissued).append(" UTC<br /><b>" + getResources().getString(R.string.expires_events) + ": </b>").append(purgetime).append(" UTC<br /><b>" + getResources().getString(R.string.regions_events) + ": </b>").append(regions).append("<br /><b>" + getResources().getString(R.string.originator_events) + ": </b>").append(org).append("<br /><b>" + getResources().getString(R.string.callsign_events) + ": </b>").append(callsign).append("<br /></div></p>");
 	    		easmsg.moveToNext();
 	    	}
 	    	htmlText.append("</body></html>");
@@ -226,7 +226,7 @@ public class MainActivity extends Activity {
         Cursor easmsg = easdb.getActiveEvent();
         
         activeEventsView.loadData("<html></html>", "text/html", null);
-        activeEventsView.loadData("<html><body>No active events</body></html>", "text/html", null);
+        activeEventsView.loadData("<html><body>" + getResources().getString(R.string.noactive_events) + "</body></html>", "text/html", null);
         
         if( easmsg != null && easmsg.moveToFirst() ){
 	    	StringBuilder htmlText = new StringBuilder();
@@ -250,8 +250,8 @@ public class MainActivity extends Activity {
 				}else if("Advisory".equals(level)){
 					color = "GREEN";
 				}
-	    		htmlText.append("<p><div class=\"box\"><div class=\"level\" style=\"background-color:").append(color).append(";\"><b>").append(level).append("</b>").append("</div>").append(desc).append("<br /><b>Time issued: </b>").append(timeissued).append(" UTC<br /><b>Expires at: </b>").append(purgetime).append(" UTC<br /><b>Regions affected: </b>").append(regions).append("<br /><b>Originator: </b>").append(org).append("<br /><b>Callsign: </b>").append(callsign).append("<br /></div></p>");
-	    		easmsg.moveToNext();
+                htmlText.append("<p><div class=\"box\"><div class=\"level\" style=\"background-color:").append(color).append(";\"><b>").append(level).append("</b>").append("</div>").append(desc).append("<br /><b>" + getResources().getString(R.string.timeissued_events) + ": </b>").append(timeissued).append(" UTC<br /><b>" + getResources().getString(R.string.expires_events) + ": </b>").append(purgetime).append(" UTC<br /><b>" + getResources().getString(R.string.regions_events) + ": </b>").append(regions).append("<br /><b>" + getResources().getString(R.string.originator_events) + ": </b>").append(org).append("<br /><b>" + getResources().getString(R.string.callsign_events) + ": </b>").append(callsign).append("<br /></div></p>");
+                easmsg.moveToNext();
 	    	}
 	    	htmlText.append("</body></html>");
 	    	activeEventsView.loadData(htmlText.toString(), "text/html", null);
@@ -312,7 +312,7 @@ public class MainActivity extends Activity {
     		// Display message about lack of root and or busybox
     		if (!RootTools.isRootAvailable()) {
     			Toast.makeText(MainActivity.this,
-    					"Root Access Not Available!",
+                        getResources().getString(R.string.toast_noroot),
     					Toast.LENGTH_LONG).show();
     		} else if (!RootTools.isBusyboxAvailable()) {
     			// Offer busybox if not installed
@@ -403,9 +403,9 @@ public class MainActivity extends Activity {
             case R.id.action_about:
                 // About was selected
             	AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            	builder.setTitle("About");
+            	builder.setTitle(getResources().getString(R.string.alert_about_title));
             	builder.setMessage(readRawTextFile(this, R.raw.about));
-            	builder.setPositiveButton("OK", null);
+            	builder.setPositiveButton(getResources().getString(R.string.alert_about_button), null);
 				builder.show();
                 return true;
             default:
@@ -721,8 +721,8 @@ public class MainActivity extends Activity {
         							}else if("Advisory".equals(level)){
         								color = "GREEN";
         							}
-        				    		htmlText.append("<p><div class=\"box\"><div class=\"level\" style=\"background-color:").append(color).append(";\"><b>").append(level).append("</b>").append("</div>").append(desc).append("<br /><b>Time issued: </b>").append(timeissued).append(" UTC<br /><b>Expires at: </b>").append(purgetime).append(" UTC<br /><b>Regions affected: </b>").append(evregions).append("<br /><b>Originator: </b>").append(org).append("<br /><b>Callsign: </b>").append(callsign).append("<br /></div></p>");
-        				    		easmsg.moveToNext();
+                                    htmlText.append("<p><div class=\"box\"><div class=\"level\" style=\"background-color:").append(color).append(";\"><b>").append(level).append("</b>").append("</div>").append(desc).append("<br /><b>" + getResources().getString(R.string.timeissued_events) + ": </b>").append(timeissued).append(" UTC<br /><b>" + getResources().getString(R.string.expires_events) + ": </b>").append(purgetime).append(" UTC<br /><b>" + getResources().getString(R.string.regions_events) + ": </b>").append(evregions).append("<br /><b>" + getResources().getString(R.string.originator_events) + ": </b>").append(org).append("<br /><b>" + getResources().getString(R.string.callsign_events) + ": </b>").append(callsign).append("<br /></div></p>");
+                                    easmsg.moveToNext();
         				    	}
         				    	htmlText.append("</body></html>");
         				    	activeEventsView.loadData(htmlText.toString(), "text/html", null);
@@ -731,8 +731,8 @@ public class MainActivity extends Activity {
         				    
         					// Send a notification
     						notificationID = 1;
-        					Notify(eventlevel + " from " + callSign,
-        							eventdesc + " was issued", notificationID);
+        					Notify(eventlevel + " " + getResources().getString(R.string.notification_from) + " " + callSign,
+        							eventdesc + " was issued" + getResources().getString(R.string.notification_end), notificationID);
         					
         					// Tell widget to update
         					SdrWidgetProvider.updateWidgetContent(getBaseContext(), 
@@ -744,7 +744,7 @@ public class MainActivity extends Activity {
                         Log.d(TAG, "Output: " + currentLine);
                         // Send toast
         		    	Toast.makeText(MainActivity.this,
-            					"No supported device found!",
+                                getResources().getString(R.string.toast_nosupportdevices),
             					Toast.LENGTH_LONG).show();
         		    	stopButton.performClick();
         		    } else if (currentLine.contains("Segmentation")) {
@@ -766,7 +766,7 @@ public class MainActivity extends Activity {
                         Log.d(TAG, "Device disconnected: " + currentLine);
                         // Send toast
                         Toast.makeText(MainActivity.this,
-                            "Device disconnected",
+                            getResources().getString(R.string.toast_devicedisconnected),
                             Toast.LENGTH_SHORT).show();
                         // Stop native processes
                         stopButton.performClick();
