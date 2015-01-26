@@ -3,14 +3,19 @@
     android:id="@+id/LinearLayout01"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
     android:orientation="vertical" >
 
     <TextView
         android:id="@+id/textView10"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/output_header"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:gravity="center" />
 
     <ScrollView
         android:id="@+id/scrollView1"
@@ -22,7 +27,7 @@
         
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical" >
 
             <WebView
@@ -63,15 +68,17 @@
 
         <Button
             android:id="@+id/button1"
-            android:layout_width="180dip"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
             android:onClick="onClickStart"
             android:text="@string/start" />
 
         <Button
             android:id="@+id/button2"
-            android:layout_width="180dip"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
             android:onClick="onClickStop"
             android:text="@string/stop" />
     </LinearLayout>
@@ -88,7 +95,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:text="@string/audio" />
-
     </LinearLayout>
 
 </LinearLayout>

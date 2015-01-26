@@ -38,6 +38,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -282,7 +283,7 @@ public class MainActivity extends Activity {
         }
     }
 	// Start button press
-    public void onClickStart()
+    public void onClickStart(View view)
     {
     	dongleUnplugged = false;
     	if (RootTools.isRootAvailable() && RootTools.isBusyboxAvailable()) {
@@ -321,7 +322,7 @@ public class MainActivity extends Activity {
     }
     
     // Stop button press
-    public void onClickStop()
+    public void onClickStop(View view)
     {
     	audioStop();
     	nativeTask.stop();
@@ -542,7 +543,7 @@ public class MainActivity extends Activity {
                     	// Log command output
                         Log.d(TAG, "Output: " + currentLine + "\n");
         				
-        				// Unumute audio if configured
+        				// Unmute audio if configured
         		        if (sharedPrefs.getBoolean("prefStartAudio", true)) {
         		        	// Update audio switch
         		        	audioSwitch.setChecked(true);
