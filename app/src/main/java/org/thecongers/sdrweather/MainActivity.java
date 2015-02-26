@@ -40,9 +40,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
@@ -83,8 +83,8 @@ public class MainActivity extends Activity {
     private boolean stopAudioRead = false;
     private boolean dongleUnplugged = false;
     private AudioTrack audioTrack;
-    private Button startButton;
-    private Button stopButton;
+    private ImageButton startButton;
+    private ImageButton stopButton;
     private Switch audioSwitch;
     private WebView activeEventsView;
     private int minBuffSize;
@@ -150,8 +150,8 @@ public class MainActivity extends Activity {
         activeEventsView = (WebView) findViewById(R.id.webView1); 
         activeEventsView.loadData("<html><body>" + getResources().getString(R.string.noactive_events) + "</body></html>", "text/html", null);
         
-        startButton = (Button) findViewById(R.id.button1);
-        stopButton = (Button) findViewById(R.id.button2);
+        startButton = (ImageButton) findViewById(R.id.button1);
+        stopButton = (ImageButton) findViewById(R.id.button2);
         // Disable stop button
     	stopButton.setEnabled(false);
         
@@ -196,17 +196,14 @@ public class MainActivity extends Activity {
     	File nativeDirectory = new File(binDir);
     	nativeDirectory.mkdirs();
     	// Copy binary assets
-    	copyFile("nativeFolder/eas-test.raw",dataRoot + "/nativeFolder/eas-test.raw",getBaseContext());
+    	//copyFile("nativeFolder/eas-test.raw",dataRoot + "/nativeFolder/eas-test.raw",getBaseContext());
     	copyFile("nativeFolder/multimon-ng",dataRoot + "/nativeFolder/multimon-ng",getBaseContext());
     	copyFile("nativeFolder/rtl_fm",dataRoot + "/nativeFolder/rtl_fm",getBaseContext());
         copyFile("nativeFolder/start.sh",dataRoot + "/nativeFolder/start.sh",getBaseContext());
         copyFile("nativeFolder/stop.sh",dataRoot + "/nativeFolder/stop.sh",getBaseContext());
         // Set execute permissions on binaries
         StringBuilder command = new StringBuilder("chmod 700 ");
-        command.append(dataRoot).append("/nativeFolder/multimon-ng ");
-        command.append(dataRoot).append("/nativeFolder/rtl_fm ");
-        command.append(dataRoot).append("/nativeFolder/start.sh ");
-        command.append(dataRoot).append("/nativeFolder/stop.sh ");
+        command.append(dataRoot).append("/nativeFolder/*");
         // Create named pipe for audio
         StringBuilder command2 = new StringBuilder("mkfifo ");
         command2.append(dataRoot).append("/pipe");
@@ -792,7 +789,7 @@ public class MainActivity extends Activity {
  	    	// Check if file exists
  	    	File existFile = new File(localPath);
  	    	if(existFile.exists()) {
- 	    		// Get existing filse md5sum for comparison
+ 	    		// Get existing files md5sum for comparison
  	    		String existingFileMD5 = fileToMD5(localPath);
  	    		
  	    		// Copy file to a temp location

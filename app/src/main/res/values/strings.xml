@@ -54,7 +54,7 @@
     <string name="appwidget_label">SDRWeather</string>
     <string name="app_icon_desc">SDRWeather</string>
 
-    <string name="noactive_events">No Active Events</string>
+    <string name="noactive_events">No Active Events Received</string>
     <string name="timeissued_events">Time issued</string>
     <string name="expires_events">Expires</string>
     <string name="regions_events">Regions</string>
