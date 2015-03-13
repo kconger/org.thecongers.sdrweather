@@ -157,7 +157,7 @@ public class MainActivity extends Activity {
         
         // Set initial frequency from preferences
     	freqSpinner = (Spinner) findViewById(R.id.spinner1);
-        int freq = Integer.parseInt(sharedPrefs.getString("prefDefaultFreq", "6"));
+        int freq = Integer.parseInt(sharedPrefs.getString("prefDefaultFreq", "3"));
         freqSpinner.setSelection(freq);
         
         // Show last currently active event if available
@@ -203,7 +203,10 @@ public class MainActivity extends Activity {
         copyFile("nativeFolder/stop.sh",dataRoot + "/nativeFolder/stop.sh",getBaseContext());
         // Set execute permissions on binaries
         StringBuilder command = new StringBuilder("chmod 700 ");
-        command.append(dataRoot).append("/nativeFolder/*");
+        command.append(dataRoot).append("/nativeFolder/multimon-ng ");
+        command.append(dataRoot).append("/nativeFolder/rtl_fm ");
+        command.append(dataRoot).append("/nativeFolder/start.sh ");
+        command.append(dataRoot).append("/nativeFolder/stop.sh ");
         // Create named pipe for audio
         StringBuilder command2 = new StringBuilder("mkfifo ");
         command2.append(dataRoot).append("/pipe");
