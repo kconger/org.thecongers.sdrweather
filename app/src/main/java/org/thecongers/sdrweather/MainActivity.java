@@ -154,6 +154,7 @@ public class MainActivity extends Activity {
         stopButton = (ImageButton) findViewById(R.id.button2);
         // Disable stop button
     	stopButton.setEnabled(false);
+        stopButton.setAlpha(0.2f);
         
         // Set initial frequency from preferences
     	freqSpinner = (Spinner) findViewById(R.id.spinner1);
@@ -304,8 +305,10 @@ public class MainActivity extends Activity {
     		}
     		// Disable start button
     		startButton.setEnabled(false);
+            startButton.setAlpha(0.2f);
     		// Enable stop button
         	stopButton.setEnabled(true);
+            stopButton.setAlpha(1.0f);
         	// Disable frequency spinner
         	freqSpinner.setEnabled(false);
     	} else {
@@ -328,9 +331,11 @@ public class MainActivity extends Activity {
     	nativeTask.stop();
     	// Enable start button
     	startButton.setEnabled(true);
+        startButton.setAlpha(1.0f);
     	// Disable stop button
     	stopButton.setEnabled(false);
-    	// Enable frequency spinner
+        stopButton.setAlpha(0.2f);
+        // Enable frequency spinner
     	freqSpinner.setEnabled(true);
     }
     
